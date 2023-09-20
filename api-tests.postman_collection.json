@@ -1,0 +1,437 @@
+{
+	"info": {
+		"_postman_id": "0d9fa76c-15f3-4291-82f5-e233f41a55cf",
+		"name": "RealWorld Dotnet",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const username = pm.variables.replaceIn('{{$randomUserName}}').toLowerCase();",
+									"pm.collectionVariables.set(\"username\", username);",
+									"pm.collectionVariables.set(\"email\", `${username}@mail.com`);",
+									"pm.collectionVariables.set(\"password\", 'password');",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Schema is valid', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(tv4.validate(jsonData, schemas.authenticatedUser)).to.be.true;    ",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user\": {\n        \"email\": \"{{email}}\",\n        \"password\": \"{{password}}\",\n        \"username\": \"{{username}}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/users",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Bad request",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422\", function () {",
+									"    pm.response.to.have.status(422);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user\": {\n        \"email\": \"{{email}}\",\n        \"password\": \"{{password}}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/users",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Schema is valid', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(tv4.validate(jsonData, schemas.authenticatedUser)).to.be.true;",
+									"    pm.collectionVariables.set('token', jsonData.user.token);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user\": {\n        \"email\": \"{{email}}\",\n        \"password\": \"{{password}}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/users/login",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Bad email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user\": {\n        \"email\": \"{{$randomEmail}}\",\n        \"password\": \"{{password}}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/users/login",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Bad password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user\": {\n        \"email\": \"{{email}}\",\n        \"password\": \"{{$randomPassword}}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/users/login",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Current user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Schema is valid', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(tv4.validate(jsonData, schemas.authenticatedUser)).to.be.true;",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{APIURL}}/user",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Current user - Bad token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{$randomUUID}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{APIURL}}/user",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Current user - Missing token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{APIURL}}/user",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"schemas = {",
+					"    authenticatedUser: {",
+					"        \"type\": \"object\",",
+					"        \"properties\": {",
+					"            \"user\": {",
+					"                \"type\": \"object\",",
+					"                \"properties\": {",
+					"                    \"email\": {",
+					"                        \"type\": \"string\"",
+					"                    },",
+					"                    \"token\": {",
+					"                        \"type\": \"string\"",
+					"                    },",
+					"                    \"username\": {",
+					"                        \"type\": \"string\"",
+					"                    },",
+					"                    \"bio\": {",
+					"                        \"type\": [\"string\", \"null\"]",
+					"                    },",
+					"                    \"image\": {",
+					"                        \"type\": [\"string\", \"null\"]",
+					"                    }",
+					"                },",
+					"                \"additionalProperties\": false,",
+					"                \"required\": [",
+					"                    \"email\",",
+					"                    \"token\",",
+					"                    \"username\",",
+					"                ]",
+					"            }",
+					"        },",
+					"        \"additionalProperties\": false,",
+					"        \"required\": [",
+					"            \"user\"",
+					"        ]",
+					"    }",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "APIURL",
+			"value": "http://localhost:5000/api",
+			"type": "default"
+		},
+		{
+			"key": "username",
+			"value": ""
+		},
+		{
+			"key": "email",
+			"value": ""
+		},
+		{
+			"key": "password",
+			"value": ""
+		},
+		{
+			"key": "token",
+			"value": ""
+		}
+	]
+}

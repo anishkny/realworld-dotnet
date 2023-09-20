@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    permissions:
+      pull-requests: write
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7
+      - uses: actions/setup-node@v3
+      - name: Build and test
+        run: |
+          npm install
+          npm run start-and-test
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+      - name: Upload coverage reports to GitHub
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: |
+            coverage.xml
+            coveragereport/
+      - name: Approve and merge Dependabot PR
+        if: github.actor == 'dependabot[bot]' && github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr review ${{ github.event.pull_request.number }} --approve
+          gh pr merge ${{ github.event.pull_request.number }} --auto --squash
