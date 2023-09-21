@@ -85,7 +85,12 @@
 									"pm.test(\"Status code is 422\", function () {",
 									"    pm.response.to.have.status(422);",
 									"});",
-									""
+									"",
+									"pm.test(\"Error is returned\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const expectedValue = { \"errors\": { \"user.username\": [ \"The username field is required.\" ] } };",
+									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -243,7 +248,12 @@
 						}
 					},
 					"response": []
-				},
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
 				{
 					"name": "Current user",
 					"event": [
@@ -351,6 +361,259 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Update user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const bio = pm.variables.replaceIn('{{$randomCatchPhrase}}');",
+									"const image = `https://loremflickr.com/240/240?rand=${Math.random()}`",
+									"pm.collectionVariables.set(\"bio\", bio);",
+									"pm.collectionVariables.set(\"image\", image);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Schema is valid', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(tv4.validate(jsonData, schemas.authenticatedUser)).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Data is correct\", function() {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.bio).to.eql(pm.collectionVariables.get(\"bio\"));",
+									"    pm.expect(jsonData.user.image).to.eql(pm.collectionVariables.get(\"image\"));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user\": {\n    \"bio\": \"{{bio}}\",\n    \"image\": \"{{image}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/user",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update user - Only email",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Schema is valid', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(tv4.validate(jsonData, schemas.authenticatedUser)).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Data is correct\", function() {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.email).to.eql(pm.collectionVariables.get(\"email\"));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user\": {\n      \"email\": \"{{email}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/user",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update user - Bad request",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422\", function () {",
+									"    pm.response.to.have.status(422);",
+									"});",
+									"",
+									"pm.test(\"Error is returned\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const expectedValue = { \"errors\": { \"user\": [ \"The user field is required.\" ] } };",
+									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"xuser\": {\n    \"bio\": \"{{bio}}\",\n    \"image\": \"{{image}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/user",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update user - No mutations",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422\", function () {",
+									"    pm.response.to.have.status(422);",
+									"});",
+									"",
+									"pm.test(\"Error is returned\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const expectedValue = { \"errors\": { \"user\": [ \"At least one field must be updated\" ] } };",
+									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user\": {\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/user",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}
@@ -431,6 +694,14 @@
 		},
 		{
 			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "bio",
+			"value": ""
+		},
+		{
+			"key": "image",
 			"value": ""
 		}
 	]

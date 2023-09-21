@@ -23,13 +23,14 @@ public class Auth
     User? user = null;
     if (authorization != null)
     {
+      context.Items.Add("token", authorization);
       user = getUserFromAuthorizationHeader(authorization, context.RequestServices.GetService<Db>());
       if (user == null)
       {
         context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
         return Task.CompletedTask;
       }
-      context.Items.Add("user", AuthenticatedUserDTOEnvelope.fromUser(user, authorization));
+      context.Items.Add("user", user);
     }
 
     // If the request is not in the allowlist, ensure that the user is authenticated
