@@ -68,7 +68,7 @@ public record AuthenticatedUserDTO
   public string? image { get; set; }
 }
 
-public class UserLoginDTOEnvelope
+public record UserLoginDTOEnvelope
 {
   public UserLoginDTO user { get; set; } = null!;
 }
@@ -77,4 +77,17 @@ public record UserLoginDTO
 {
   public string email { get; set; } = null!;
   public string password { get; set; } = null!;
+}
+
+public record UserUpdateDTOEnvelope
+{
+  [Required]
+  public UserUpdateDTO user { get; set; } = null!;
+}
+
+public record UserUpdateDTO
+{
+  public string? email { get; set; }
+  public string? bio { get; set; }
+  public string? image { get; set; }
 }
