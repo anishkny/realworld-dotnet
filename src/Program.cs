@@ -15,5 +15,6 @@ app.MapMethods("/", new[] { "HEAD" }, () => "");
 
 var apiGroup = app.MapGroup("/api");
 UserHandlers.MapMethods(apiGroup);
+ProfileHandlers.MapMethods(apiGroup);
 
 app.Run();

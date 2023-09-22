@@ -616,6 +616,507 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Profile",
+			"item": [
+				{
+					"name": "Register celeb user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const username = pm.variables.replaceIn('celeb-{{$randomUserName}}').toLowerCase();",
+									"pm.collectionVariables.set(\"celeb-username\", username);",
+									"pm.collectionVariables.set(\"celeb-email\", `${username}@mail.com`);",
+									"pm.collectionVariables.set(\"celeb-password\", 'password');",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Schema is valid', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(tv4.validate(jsonData, schemas.authenticatedUser)).to.be.true;    ",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user\": {\n        \"email\": \"{{celeb-email}}\",\n        \"password\": \"{{celeb-password}}\",\n        \"username\": \"{{celeb-username}}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/users",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Schema is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(tv4.validate(jsonData, schemas.profile)).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Data is correct\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    expectedValue = {",
+									"        profile: {",
+									"            username: pm.collectionVariables.get('celeb-username'),",
+									"            bio: \"\",",
+									"            image: \"\",",
+									"            following: false,",
+									"        }",
+									"    };",
+									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{APIURL}}/profiles/{{celeb-username}}",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"profiles",
+								"{{celeb-username}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get profile - Unknown",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{APIURL}}/profiles/{{$randomUserName}}",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"profiles",
+								"{{$randomUserName}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Follow",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Schema is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(tv4.validate(jsonData, schemas.profile)).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Data is correct\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    expectedValue = {",
+									"        profile: {",
+									"            username: pm.collectionVariables.get('celeb-username'),",
+									"            bio: \"\",",
+									"            image: \"\",",
+									"            following: true,",
+									"        }",
+									"    };",
+									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{APIURL}}/profiles/{{celeb-username}}/follow",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"profiles",
+								"{{celeb-username}}",
+								"follow"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Follow - Again",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Schema is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(tv4.validate(jsonData, schemas.profile)).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Data is correct\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    expectedValue = {",
+									"        profile: {",
+									"            username: pm.collectionVariables.get('celeb-username'),",
+									"            bio: \"\",",
+									"            image: \"\",",
+									"            following: true,",
+									"        }",
+									"    };",
+									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{APIURL}}/profiles/{{celeb-username}}/follow",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"profiles",
+								"{{celeb-username}}",
+								"follow"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Follow - Unknown",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{APIURL}}/profiles/{{$randomUserName}}/follow",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"profiles",
+								"{{$randomUserName}}",
+								"follow"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get profile - After follow",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Schema is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(tv4.validate(jsonData, schemas.profile)).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Data is correct\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    expectedValue = {",
+									"        profile: {",
+									"            username: pm.collectionVariables.get('celeb-username'),",
+									"            bio: \"\",",
+									"            image: \"\",",
+									"            following: true,",
+									"        }",
+									"    };",
+									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{APIURL}}/profiles/{{celeb-username}}",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"profiles",
+								"{{celeb-username}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unfollow",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Schema is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(tv4.validate(jsonData, schemas.profile)).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Data is correct\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    expectedValue = {",
+									"        profile: {",
+									"            username: pm.collectionVariables.get('celeb-username'),",
+									"            bio: \"\",",
+									"            image: \"\",",
+									"            following: false,",
+									"        }",
+									"    };",
+									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{APIURL}}/profiles/{{celeb-username}}/follow",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"profiles",
+								"{{celeb-username}}",
+								"follow"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unfollow - Again",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Schema is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(tv4.validate(jsonData, schemas.profile)).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Data is correct\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    expectedValue = {",
+									"        profile: {",
+									"            username: pm.collectionVariables.get('celeb-username'),",
+									"            bio: \"\",",
+									"            image: \"\",",
+									"            following: false,",
+									"        }",
+									"    };",
+									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{APIURL}}/profiles/{{celeb-username}}/follow",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"profiles",
+								"{{celeb-username}}",
+								"follow"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unfollow - Unknown",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{APIURL}}/profiles/{{$randomUserName}}/follow",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"profiles",
+								"{{$randomUserName}}",
+								"follow"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [
@@ -658,6 +1159,37 @@
 					"        \"additionalProperties\": false,",
 					"        \"required\": [",
 					"            \"user\"",
+					"        ]",
+					"    },",
+					"    profile: {",
+					"        \"type\": \"object\",",
+					"        \"properties\": {",
+					"            \"profile\": {",
+					"                \"type\": \"object\",",
+					"                \"properties\": {",
+					"                    \"username\": {",
+					"                        \"type\": \"string\"",
+					"                    },",
+					"                    \"bio\": {",
+					"                        \"type\": \"string\"",
+					"                    },",
+					"                    \"image\": {",
+					"                        \"type\": \"string\"",
+					"                    },",
+					"                    \"following\": {",
+					"                        \"type\": \"boolean\"",
+					"                    }",
+					"                },",
+					"                \"required\": [",
+					"                    \"username\",",
+					"                    \"bio\",",
+					"                    \"image\",",
+					"                    \"following\"",
+					"                ]",
+					"            }",
+					"        },",
+					"        \"required\": [",
+					"            \"profile\"",
 					"        ]",
 					"    }",
 					"}"
@@ -702,6 +1234,18 @@
 		},
 		{
 			"key": "image",
+			"value": ""
+		},
+		{
+			"key": "celeb-username",
+			"value": ""
+		},
+		{
+			"key": "celeb-email",
+			"value": ""
+		},
+		{
+			"key": "celeb-password",
 			"value": ""
 		}
 	]

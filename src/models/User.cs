@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 [Index(nameof(Email), IsUnique = true)]
 [Index(nameof(Username), IsUnique = true)]
+[ExcludeFromCodeCoverage]
 public class User
 {
   public uint Id { get; set; }
@@ -19,6 +20,17 @@ public class User
     Username = userDTO.username.ToLower().Trim(),
     PasswordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(userDTO.password),
   };
+
+  public static User? getUserById(Db? db, uint userId)
+  {
+    return db?.Users.SingleOrDefault(u => u.Id == userId);
+  }
+
+  public static User? getUserByUsername(Db? db, string username)
+  {
+    return db?.Users.SingleOrDefault(u => u.Username == username);
+  }
+
 }
 
 [ExcludeFromCodeCoverage]
@@ -39,8 +51,6 @@ public record UserRegistrationDTO
   [Required]
   public string password { get; set; } = null!;
 }
-
-
 
 public record AuthenticatedUserDTOEnvelope
 {
@@ -91,3 +101,4 @@ public record UserUpdateDTO
   public string? bio { get; set; }
   public string? image { get; set; }
 }
+

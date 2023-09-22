@@ -5,6 +5,7 @@ PORT=5000
 TIMEOUT=30000   # in milliseconds
 
 npm run build
+set +e; npm run stop || true; set -e
 npm start &
 npx wait-on --timeout $TIMEOUT http://localhost:$PORT
 npm test
