@@ -47,7 +47,7 @@ public class UserHandlers
 
   public static IResult getCurrentUser(HttpContext httpContext)
   {
-    var (user, token) = getUserAndToken(httpContext);
+    var (user, token) = Auth.getUserAndToken(httpContext);
     return Results.Ok(AuthenticatedUserDTOEnvelope.fromUser(user, token));
   }
 
@@ -68,22 +68,13 @@ public class UserHandlers
     }
 
     // Update the user
-    var (user, token) = getUserAndToken(httpContext);
+    var (user, token) = Auth.getUserAndToken(httpContext);
     if (userUpdateDTOEnvelope.user.email != null) user.Email = userUpdateDTOEnvelope.user.email;
     if (userUpdateDTOEnvelope.user.bio != null) user.Bio = userUpdateDTOEnvelope.user.bio;
     if (userUpdateDTOEnvelope.user.image != null) user.Image = userUpdateDTOEnvelope.user.image;
     db.SaveChanges();
 
     return Results.Ok(AuthenticatedUserDTOEnvelope.fromUser(user, token));
-  }
-
-  [ExcludeFromCodeCoverage]
-  static (User, string) getUserAndToken(HttpContext httpContext)
-  {
-    var user = (User?)httpContext.Items["user"];
-    var token = (string?)httpContext.Items["token"];
-    if (user == null || token == null) throw new Exception("User and token not found in request context");
-    return (user, token);
   }
 
 }
