@@ -29,6 +29,7 @@ public class Follow
 
 }
 
+[ExcludeFromCodeCoverage]
 public record ProfileDTOEnvelope
 {
   public ProfileDTO profile { get; set; } = null!;
@@ -42,6 +43,7 @@ public record ProfileDTOEnvelope
   };
 }
 
+[ExcludeFromCodeCoverage]
 public record ProfileDTO
 {
   public string username { get; set; } = null!;

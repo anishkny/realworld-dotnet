@@ -2,7 +2,7 @@
   "scripts": {
     "build": "dotnet build",
     "prestart:only": "rm -rf coverage* && dotnet tool restore && dotnet ef database update --no-build",
-    "start:only": "dotnet tool run dotnet-coverage collect -o coverage.xml -f cobertura dotnet run --no-build",
+    "start:only": "dotnet tool run dotnet-coverage collect -o coverage.xml -f cobertura -if 'bin/Debug/net8.0/realworld-dotnet.dll' -- dotnet run --no-build",
     "start": "npm run build && npm run start:only",
     "test": "newman run api-tests.postman_collection.json --delay-request 500 --bail",
     "stop": "kill-port 5000",
@@ -11,10 +11,10 @@
     "check-coverage": "node ./check-coverage.js"
   },
   "devDependencies": {
-    "@xmldom/xmldom": "^0.8.10",
-    "kill-port-process": "^3.2.0",
-    "newman": "^6.0.0",
-    "wait-on": "^7.2.0",
-    "xpath": "^0.0.33"
+    "@xmldom/xmldom": "^0.8.11",
+    "kill-port-process": "^3.2.1",
+    "newman": "^6.2.1",
+    "wait-on": "^9.0.1",
+    "xpath": "^0.0.34"
   }
 }

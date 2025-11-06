@@ -1,3 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
+
+[ExcludeFromCodeCoverage]
 public record ErrorDTO
 {
   public object? Errors { get; set; }

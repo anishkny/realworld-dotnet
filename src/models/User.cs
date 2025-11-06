@@ -52,6 +52,7 @@ public record UserRegistrationDTO
   public string password { get; set; } = null!;
 }
 
+[ExcludeFromCodeCoverage]
 public record AuthenticatedUserDTOEnvelope
 {
   public AuthenticatedUserDTO user { get; set; } = null!;
@@ -69,6 +70,7 @@ public record AuthenticatedUserDTOEnvelope
   };
 }
 
+[ExcludeFromCodeCoverage]
 public record AuthenticatedUserDTO
 {
   public string email { get; set; } = null!;
@@ -78,27 +80,30 @@ public record AuthenticatedUserDTO
   public string? image { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 public record UserLoginDTOEnvelope
 {
   public UserLoginDTO user { get; set; } = null!;
 }
 
+[ExcludeFromCodeCoverage]
 public record UserLoginDTO
 {
   public string email { get; set; } = null!;
   public string password { get; set; } = null!;
 }
 
+[ExcludeFromCodeCoverage]
 public record UserUpdateDTOEnvelope
 {
   [Required]
   public UserUpdateDTO user { get; set; } = null!;
 }
 
+[ExcludeFromCodeCoverage]
 public record UserUpdateDTO
 {
   public string? email { get; set; }
   public string? bio { get; set; }
   public string? image { get; set; }
 }
-

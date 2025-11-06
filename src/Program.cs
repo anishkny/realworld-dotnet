@@ -12,6 +12,7 @@ builder.Host.UseSerilog();
 var app = builder.Build();
 app.Use(Auth.AuthenticateRequest);
 app.MapMethods("/", new[] { "HEAD" }, () => "");
+// app.MapGet("/", () => Results.Ok());
 
 var apiGroup = app.MapGroup("/api");
 UserHandlers.MapMethods(apiGroup);
