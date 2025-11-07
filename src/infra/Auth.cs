@@ -7,15 +7,19 @@ using JWT.Serializers;
 public class Auth
 {
 
+  // Method to check if the endpoint is public
+  static bool isPublicEndpoint(string method, string path) => (method.ToUpper(), path.ToLower()) switch
+  {
+    ("GET", "/") => true,
+    ("POST", "/api/users") => true,
+    ("POST", "/api/users/login") => true,
+    ("GET", var p) when p.StartsWith("/api/profiles/") => true,
+    _ => false
+  };
+
+  // Allowlist of methods and paths that are allowed without authentication
   static public Task AuthenticateRequest(HttpContext context, Func<Task> next)
   {
-    // Allowlist of methods and paths that are allowed without authentication
-    string[] allowlistUnathenticated = {
-      "HEAD /",
-      "POST /api/users",
-      "POST /api/users/login",
-      "GET /api/profiles/",
-    };
     Console.WriteLine($"{context.Request.Method} {context.Request.Path}");
 
     // If authorization header is present, check for authentication
@@ -35,7 +39,7 @@ public class Auth
     }
 
     // If the request is not in the allowlist, ensure that the user is authenticated
-    if (!allowlistUnathenticated.Any(e => $"{context.Request.Method} {context.Request.Path}".StartsWith(e)))
+    if (!isPublicEndpoint(context.Request.Method, context.Request.Path))
     {
       if (user == null)
       {
@@ -77,20 +81,11 @@ public class Auth
   }
 
   [ExcludeFromCodeCoverage]
-  public static (User, string) getUserAndToken(HttpContext httpContext)
+  public static (User?, string?) getUserAndToken(HttpContext httpContext)
   {
     var user = (User?)httpContext.Items["user"];
     var token = (string?)httpContext.Items["token"];
-    if (user == null || token == null) { throw new Exception("User and token not found in context"); }
     return (user, token);
-  }
-
-  // Check if authorization header is present
-  public static bool hasAuthorizationHeader(HttpContext httpContext)
-  {
-    var authorizationHeaders = httpContext.Request.Headers["Authorization"];
-    var authorization = authorizationHeaders.Count > 0 ? authorizationHeaders[0] : null;
-    return authorization != null;
   }
 
 }
