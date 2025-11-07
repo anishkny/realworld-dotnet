@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "build": "dotnet build",
+    "format:fix": "dotnet format realworld-dotnet.csproj",
+    "format:check": "dotnet format realworld-dotnet.csproj --verify-no-changes",
+    "build": "npm run format:check && dotnet build",
     "prestart:only": "rm -rf coverage* && dotnet tool restore && dotnet ef database update --no-build",
     "start:only": "dotnet tool run dotnet-coverage collect -o coverage.xml -f cobertura -if 'bin/Debug/net8.0/realworld-dotnet.dll' -- dotnet run --no-build",
     "start": "npm run build && npm run start:only",
@@ -14,7 +16,7 @@
     "@xmldom/xmldom": "^0.8.11",
     "kill-port-process": "^3.2.1",
     "newman": "^6.2.1",
-    "wait-on": "^9.0.1",
+    "wait-port": "^1.1.0",
     "xpath": "^0.0.34"
   }
 }

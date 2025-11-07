@@ -24,9 +24,9 @@ public class ProfileHandlers
 
     // If the user is authenticated, check if they follow the profile
     var isFollowing = false;
-    if (Auth.hasAuthorizationHeader(httpContext))
+    var (currentUser, _) = Auth.getUserAndToken(httpContext);
+    if (currentUser != null)
     {
-      var (currentUser, _) = Auth.getUserAndToken(httpContext);
       isFollowing = Follow.isFollowing(httpContext.RequestServices.GetService<Db>(), currentUser.Id, user.Id);
     }
     return Results.Ok(new ProfileDTOEnvelope(user, isFollowing));
@@ -45,7 +45,7 @@ public class ProfileHandlers
     var (currentUser, _) = Auth.getUserAndToken(httpContext);
 
     // Follow the user
-    Follow.followUser(httpContext.RequestServices.GetService<Db>(), currentUser, user);
+    Follow.followUser(httpContext.RequestServices.GetService<Db>(), currentUser!, user);
 
     // Return the profile
     return Results.Ok(new ProfileDTOEnvelope(user, true));
@@ -64,7 +64,7 @@ public class ProfileHandlers
     var (currentUser, _) = Auth.getUserAndToken(httpContext);
 
     // Unfollow the user
-    Follow.unfollowUser(httpContext.RequestServices.GetService<Db>(), currentUser, user);
+    Follow.unfollowUser(httpContext.RequestServices.GetService<Db>(), currentUser!, user);
 
     // Return the profile
     return Results.Ok(new ProfileDTOEnvelope(user, false));

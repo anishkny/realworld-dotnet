@@ -48,7 +48,7 @@ public class UserHandlers
   public static IResult getCurrentUser(HttpContext httpContext)
   {
     var (user, token) = Auth.getUserAndToken(httpContext);
-    return Results.Ok(AuthenticatedUserDTOEnvelope.fromUser(user, token));
+    return Results.Ok(AuthenticatedUserDTOEnvelope.fromUser(user!, token!));
   }
 
   public static IResult updateCurrentUser(HttpContext httpContext, UserUpdateDTOEnvelope userUpdateDTOEnvelope, Db db)
@@ -69,12 +69,12 @@ public class UserHandlers
 
     // Update the user
     var (user, token) = Auth.getUserAndToken(httpContext);
-    if (userUpdateDTOEnvelope.user.email != null) user.Email = userUpdateDTOEnvelope.user.email;
-    if (userUpdateDTOEnvelope.user.bio != null) user.Bio = userUpdateDTOEnvelope.user.bio;
-    if (userUpdateDTOEnvelope.user.image != null) user.Image = userUpdateDTOEnvelope.user.image;
+    if (userUpdateDTOEnvelope.user.email != null) user!.Email = userUpdateDTOEnvelope.user.email;
+    if (userUpdateDTOEnvelope.user.bio != null) user!.Bio = userUpdateDTOEnvelope.user.bio;
+    if (userUpdateDTOEnvelope.user.image != null) user!.Image = userUpdateDTOEnvelope.user.image;
     db.SaveChanges();
 
-    return Results.Ok(AuthenticatedUserDTOEnvelope.fromUser(user, token));
+    return Results.Ok(AuthenticatedUserDTOEnvelope.fromUser(user!, token!));
   }
 
 }
