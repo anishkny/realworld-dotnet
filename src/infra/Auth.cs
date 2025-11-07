@@ -58,11 +58,11 @@ public class Auth
     new JwtEncoder(new HMACSHA256Algorithm(), new JsonNetSerializer(), new JwtBase64UrlEncoder())
       .Encode(new Dictionary<string, object> { { "id", user.Id } }, getJwtSecretKey());
 
-  static public uint verifyToken(string token)
+  static public Guid verifyToken(string token)
   {
     var claims = new JwtDecoder(new JsonNetSerializer(), new JwtValidator(new JsonNetSerializer(), new UtcDateTimeProvider()), new JwtBase64UrlEncoder(), new HMACSHA256Algorithm())
       .DecodeToObject<Dictionary<string, object>>(token, getJwtSecretKey(), verify: true);
-    return (uint)(long)claims["id"];
+    return Guid.Parse(claims["id"].ToString()!);
   }
 
   static public User? getUserFromAuthorizationHeader(string authorization, Db? db)
@@ -70,7 +70,7 @@ public class Auth
     User? user;
     try
     {
-      uint userId = verifyToken(authorization);
+      Guid userId = verifyToken(authorization);
       user = User.getUserById(db, userId);
     }
     catch (Exception)

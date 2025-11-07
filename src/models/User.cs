@@ -5,9 +5,8 @@ using Microsoft.EntityFrameworkCore;
 [Index(nameof(Email), IsUnique = true)]
 [Index(nameof(Username), IsUnique = true)]
 [ExcludeFromCodeCoverage]
-public class User
+public class User : BaseEntity
 {
-  public uint Id { get; set; }
   public string Email { get; set; } = null!;
   public string Username { get; set; } = null!;
   public string PasswordHash { get; set; } = null!;
@@ -21,7 +20,7 @@ public class User
     PasswordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(userDTO.password),
   };
 
-  public static User? getUserById(Db? db, uint userId)
+  public static User? getUserById(Db? db, Guid userId)
   {
     return db?.Users.SingleOrDefault(u => u.Id == userId);
   }
