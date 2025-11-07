@@ -1,13 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 
 [ExcludeFromCodeCoverage]
-public class Follow
+public class Follow : BaseEntity
 {
-  public uint Id { get; set; }
   public User Follower { get; set; } = null!;
   public User Followed { get; set; } = null!;
 
-  public static bool isFollowing(Db? db, uint followerId, uint followeeId)
+  public static bool isFollowing(Db? db, Guid followerId, Guid followeeId)
   {
     return db?.Follows.Any(f => f.Follower.Id == followerId && f.Followed.Id == followeeId) ?? false;
   }
