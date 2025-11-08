@@ -1,3 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
+
+[ExcludeFromCodeCoverage]
 public class Article : BaseEntity
 {
   public string Slug { get; set; } = "";

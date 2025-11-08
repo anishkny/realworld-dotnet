@@ -1,9 +1,13 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 
 public class Db(DbContextOptions<Db> options) : DbContext(options)
 {
   public DbSet<User> Users => Set<User>();
   public DbSet<Follow> Follows => Set<Follow>();
+
+  // TODO: Remove the following annotation after adding handlers for Articles
+  [ExcludeFromCodeCoverage]
   public DbSet<Article> Articles => Set<Article>();
 
   // Set UpdatedAt before saving changes
