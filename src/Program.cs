@@ -13,4 +13,7 @@ var app = builder.Build();
 app.Use(Auth.AuthenticateRequest);
 RouteMapper.MapMethods(app);
 
+// TODO: Remove this in favor of proper migrations
+using (var scope = app.Services.CreateScope()) { scope.ServiceProvider.GetRequiredService<Db>().Database.EnsureCreated(); }
+
 app.Run();
