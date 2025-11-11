@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "0d9fa76c-15f3-4291-82f5-e233f41a55cf",
+		"_postman_id": "b28e700a-da19-4aef-8ae6-b6a065defd5b",
 		"name": "RealWorld Dotnet",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1841370"
 	},
 	"item": [
 		{
@@ -137,11 +138,16 @@
 									"});",
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -1106,6 +1112,148 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Article",
+			"item": [
+				{
+					"name": "Create Article",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"articleTitle\", pm.variables.replaceIn(\"{{$randomLoremSentence}}\"));",
+									"pm.collectionVariables.set(\"articleDescription\", pm.variables.replaceIn(\"{{$randomLoremSentence}}\"));",
+									"pm.collectionVariables.set(\"articleBody\", pm.variables.replaceIn(\"{{$randomLoremSentences}}\"));",
+									"pm.collectionVariables.set(\"articleTag1\", pm.variables.replaceIn(\"{{$randomLoremWord}}\"));",
+									"pm.collectionVariables.set(\"articleTag2\", pm.variables.replaceIn(\"{{$randomLoremWord}}\"));",
+									"pm.collectionVariables.set(\"articleTag3\", pm.variables.replaceIn(\"{{$randomLoremWord}}\"));",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Schema is valid', function () {",
+									"    pm.response.to.have.jsonSchema(schemas.article);",
+									"});",
+									"",
+									"pm.test(\"Data is correct\", function() {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.article.title).to.eql(pm.collectionVariables.get(\"articleTitle\"));",
+									"    pm.expect(jsonData.article.description).to.eql(pm.collectionVariables.get(\"articleDescription\"));",
+									"    pm.expect(jsonData.article.body).to.eql(pm.collectionVariables.get(\"articleBody\"));",
+									"",
+									"    // Capture article slug for future use",
+									"    pm.collectionVariables.set(\"articleSlug\", jsonData.article.slug);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"article\": {\n        \"title\": \"{{articleTitle}}\",\n        \"description\": \"{{articleDescription}}\",\n        \"body\": \"{{articleBody}}\",\n        \"tagList\": [\"{{articleTag1}}\", \"{{articleTag2}}\", \"{{articleTag3}}\"]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/articles",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"articles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Article - Bad request",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422\", function () {",
+									"    pm.response.to.have.status(422);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"article\": {\n        \"foo\": \"bar\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/articles",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"articles"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [
@@ -1113,74 +1261,130 @@
 			"listen": "prerequest",
 			"script": {
 				"type": "text/javascript",
+				"requests": {},
 				"exec": [
 					"schemas = {",
-					"    authenticatedUser: {",
+					"  authenticatedUser: {",
+					"    \"type\": \"object\",",
+					"    \"properties\": {",
+					"      \"user\": {",
 					"        \"type\": \"object\",",
 					"        \"properties\": {",
-					"            \"user\": {",
-					"                \"type\": \"object\",",
-					"                \"properties\": {",
-					"                    \"email\": {",
-					"                        \"type\": \"string\"",
-					"                    },",
-					"                    \"token\": {",
-					"                        \"type\": \"string\"",
-					"                    },",
-					"                    \"username\": {",
-					"                        \"type\": \"string\"",
-					"                    },",
-					"                    \"bio\": {",
-					"                        \"type\": [\"string\", \"null\"]",
-					"                    },",
-					"                    \"image\": {",
-					"                        \"type\": [\"string\", \"null\"]",
-					"                    }",
-					"                },",
-					"                \"additionalProperties\": false,",
-					"                \"required\": [",
-					"                    \"email\",",
-					"                    \"token\",",
-					"                    \"username\",",
-					"                ]",
-					"            }",
+					"          \"email\": {",
+					"            \"type\": \"string\"",
+					"          },",
+					"          \"token\": {",
+					"            \"type\": \"string\"",
+					"          },",
+					"          \"username\": {",
+					"            \"type\": \"string\"",
+					"          },",
+					"          \"bio\": {",
+					"            \"type\": [\"string\", \"null\"]",
+					"          },",
+					"          \"image\": {",
+					"            \"type\": [\"string\", \"null\"]",
+					"          }",
 					"        },",
 					"        \"additionalProperties\": false,",
 					"        \"required\": [",
-					"            \"user\"",
+					"          \"email\",",
+					"          \"token\",",
+					"          \"username\",",
 					"        ]",
+					"      }",
 					"    },",
-					"    profile: {",
+					"    \"additionalProperties\": false,",
+					"    \"required\": [",
+					"      \"user\"",
+					"    ]",
+					"  },",
+					"  profile: {",
+					"    \"type\": \"object\",",
+					"    \"properties\": {",
+					"      \"profile\": {",
 					"        \"type\": \"object\",",
 					"        \"properties\": {",
-					"            \"profile\": {",
-					"                \"type\": \"object\",",
-					"                \"properties\": {",
-					"                    \"username\": {",
-					"                        \"type\": \"string\"",
-					"                    },",
-					"                    \"bio\": {",
-					"                        \"type\": \"string\"",
-					"                    },",
-					"                    \"image\": {",
-					"                        \"type\": \"string\"",
-					"                    },",
-					"                    \"following\": {",
-					"                        \"type\": \"boolean\"",
-					"                    }",
-					"                },",
-					"                \"required\": [",
-					"                    \"username\",",
-					"                    \"bio\",",
-					"                    \"image\",",
-					"                    \"following\"",
-					"                ]",
-					"            }",
+					"          \"username\": {",
+					"            \"type\": \"string\"",
+					"          },",
+					"          \"bio\": {",
+					"            \"type\": \"string\"",
+					"          },",
+					"          \"image\": {",
+					"            \"type\": \"string\"",
+					"          },",
+					"          \"following\": {",
+					"            \"type\": \"boolean\"",
+					"          }",
 					"        },",
 					"        \"required\": [",
-					"            \"profile\"",
+					"          \"username\",",
+					"          \"bio\",",
+					"          \"image\",",
+					"          \"following\"",
 					"        ]",
-					"    }",
+					"      }",
+					"    },",
+					"    \"required\": [",
+					"      \"profile\"",
+					"    ]",
+					"  },",
+					"  article: {",
+					"    \"type\": \"object\",",
+					"    \"properties\": {",
+					"      \"article\": {",
+					"        \"type\": \"object\",",
+					"        \"properties\": {",
+					"          \"slug\": { \"type\": \"string\" },",
+					"          \"title\": { \"type\": \"string\" },",
+					"          \"description\": { \"type\": \"string\" },",
+					"          \"body\": { \"type\": \"string\" },",
+					"          \"tagList\": {",
+					"            \"type\": \"array\",",
+					"            \"items\": { \"type\": \"string\" }",
+					"          },",
+					"          \"createdAt\": {",
+					"            \"type\": \"string\",",
+					"            \"format\": \"date-time\"",
+					"          },",
+					"          \"updatedAt\": {",
+					"            \"type\": \"string\",",
+					"            \"format\": \"date-time\"",
+					"          },",
+					"          \"favorited\": { \"type\": \"boolean\" },",
+					"          \"favoritesCount\": { \"type\": \"integer\" },",
+					"          \"author\": {",
+					"            \"type\": \"object\",",
+					"            \"properties\": {",
+					"              \"username\": { \"type\": \"string\" },",
+					"              \"bio\": { \"type\": \"string\" },",
+					"              \"image\": { \"type\": \"string\" },",
+					"              \"following\": { \"type\": \"boolean\" }",
+					"            },",
+					"            \"required\": [\"username\", \"bio\", \"image\", \"following\"],",
+					"            \"additionalProperties\": false",
+					"          }",
+					"        },",
+					"        \"required\": [",
+					"          \"slug\",",
+					"          \"title\",",
+					"          \"description\",",
+					"          \"body\",",
+					"          \"tagList\",",
+					"          \"createdAt\",",
+					"          \"updatedAt\",",
+					"          \"favorited\",",
+					"          \"favoritesCount\",",
+					"          \"author\"",
+					"        ],",
+					"        \"additionalProperties\": false",
+					"      }",
+					"    },",
+					"    \"required\": [\"article\"],",
+					"    \"additionalProperties\": false",
+					"  }",
+					"",
 					"}"
 				]
 			}
@@ -1189,6 +1393,7 @@
 			"listen": "test",
 			"script": {
 				"type": "text/javascript",
+				"requests": {},
 				"exec": [
 					""
 				]
@@ -1198,8 +1403,7 @@
 	"variable": [
 		{
 			"key": "APIURL",
-			"value": "http://localhost:5000/api",
-			"type": "default"
+			"value": "http://localhost:3000/api"
 		},
 		{
 			"key": "username",
@@ -1235,6 +1439,38 @@
 		},
 		{
 			"key": "celeb-password",
+			"value": ""
+		},
+		{
+			"key": "articleTitle",
+			"value": ""
+		},
+		{
+			"key": "articleDescription",
+			"value": ""
+		},
+		{
+			"key": "articleBody",
+			"value": ""
+		},
+		{
+			"key": "articleTags",
+			"value": ""
+		},
+		{
+			"key": "articleTag1",
+			"value": ""
+		},
+		{
+			"key": "articleTag2",
+			"value": ""
+		},
+		{
+			"key": "articleTag3",
+			"value": ""
+		},
+		{
+			"key": "articleSlug",
 			"value": ""
 		}
 	]

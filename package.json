@@ -7,7 +7,7 @@
     "start:only": "dotnet tool run dotnet-coverage collect -o coverage.xml -f cobertura -if 'bin/Debug/net8.0/realworld-dotnet.dll' -- dotnet run --no-build",
     "start": "npm run build && npm run start:only",
     "test:only": "newman run api-tests.postman_collection.json --delay-request 500 --bail",
-    "stop": "kill-port 5000",
+    "stop": "kill-port 3000",
     "test": "./start-and-test.sh",
     "coverage-report": "dotnet reportgenerator -reports:coverage.xml -targetdir:coveragereport -sourcedirs:src -assemblyfilters:'-MiniValidation;-Serilog.*' -classfilters:'-*.migrations.*' -reporttypes:'HtmlInline;JsonSummary;lcov;TextSummary' && cat coveragereport/Summary.txt",
     "check-coverage": "node ./check-coverage.js"

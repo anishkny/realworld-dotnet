@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
-PORT=5000
+PORT=3000
 TIMEOUT=30000   # in milliseconds
 
 npm run build
