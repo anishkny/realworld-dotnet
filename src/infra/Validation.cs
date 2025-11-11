@@ -17,9 +17,20 @@ public class Validation
       schema.AllowAdditionalProperties = false;
       _cache[typeof(T)] = schema;
     }
-    var errors = schema.Validate(json);
-    var errorMessages = errors.Select(e => $"{e.Path}: {e.Kind}").ToList();
-    var obj = System.Text.Json.JsonSerializer.Deserialize<T>(json);
+
+    ICollection<NJsonSchema.Validation.ValidationError> errors;
+    IList<string> errorMessages;
+    T? obj;
+    try
+    {
+      errors = schema.Validate(json);
+      errorMessages = errors.Select(e => $"{e.Path}: {e.Kind}").ToList();
+      obj = System.Text.Json.JsonSerializer.Deserialize<T>(json);
+    }
+    catch (Exception)
+    {
+      return (default(T)!, new List<string> { "Error parsing JSON" });
+    }
     if (errorMessages.Count == 0)
     {
       return (obj!, errorMessages);
