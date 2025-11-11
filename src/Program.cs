@@ -10,6 +10,14 @@ Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 builder.Host.UseSerilog();
 
 var app = builder.Build();
+
+// Apply migrations automatically on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<Db>();
+    db.Database.Migrate();
+}
+
 app.Use(Auth.AuthenticateRequest);
 RouteMapper.MapMethods(app);
 

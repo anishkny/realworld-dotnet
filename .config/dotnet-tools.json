@@ -9,13 +9,6 @@
       ],
       "rollForward": false
     },
-    "dotnet-ef": {
-      "version": "9.0.10",
-      "commands": [
-        "dotnet-ef"
-      ],
-      "rollForward": false
-    },
     "dotnet-reportgenerator-globaltool": {
       "version": "5.4.18",
       "commands": [
