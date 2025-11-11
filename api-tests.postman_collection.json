@@ -75,7 +75,9 @@
 								"exec": [
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						},
 						{
@@ -88,11 +90,13 @@
 									"",
 									"pm.test(\"Error is returned\", function () {",
 									"    const jsonData = pm.response.json();",
-									"    const expectedValue = { \"errors\": { \"user.username\": [ \"The username field is required.\" ] } };",
+									"    const expectedValue = { \"errors\": [ \"#/user.username: PropertyRequired\" ] };",
 									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
@@ -506,7 +510,9 @@
 								"exec": [
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						},
 						{
@@ -519,11 +525,13 @@
 									"",
 									"pm.test(\"Error is returned\", function () {",
 									"    const jsonData = pm.response.json();",
-									"    const expectedValue = { \"errors\": { \"user\": [ \"The user field is required.\" ] } };",
+									"    const expectedValue = { \"errors\": [ \"#/user: PropertyRequired\", \"#/xuser: NoAdditionalPropertiesAllowed\" ] };",
 									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
@@ -1215,7 +1223,12 @@
 									"pm.test(\"Status code is 422\", function () {",
 									"    pm.response.to.have.status(422);",
 									"});",
-									""
+									"",
+									"pm.test(\"Error is returned\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const expectedValue = { \"errors\": [ \"#/article: PropertyRequired\", \"#/foo: NoAdditionalPropertiesAllowed\" ] };",
+									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
+									"});"
 								],
 								"type": "text/javascript",
 								"packages": {},
@@ -1234,7 +1247,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"article\": {\n        \"foo\": \"bar\"\n    }\n}",
+							"raw": "{\n  \"foo\": \"bar\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
