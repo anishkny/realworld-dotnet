@@ -8,5 +8,6 @@ public class RouteMapper
     var apiGroup = app.MapGroup("/api");
     UserHandlers.MapMethods(apiGroup);
     ProfileHandlers.MapMethods(apiGroup);
+    ArticleHandlers.MapMethods(apiGroup);
   }
 }

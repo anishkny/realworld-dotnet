@@ -10,8 +10,8 @@ public class User : BaseEntity
   public string Email { get; set; } = null!;
   public string Username { get; set; } = null!;
   public string PasswordHash { get; set; } = null!;
-  public string? Bio { get; set; }
-  public string? Image { get; set; } = null!;
+  public string Bio { get; set; } = "";
+  public string Image { get; set; } = "";
 
   public static User fromRegistrationDTO(UserRegistrationDTO userDTO) => new User
   {
