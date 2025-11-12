@@ -34,6 +34,11 @@ public class Article : BaseEntity
     }
     if (dto.description != null) Description = dto.description;
     if (dto.body != null) Body = dto.body;
+    if (dto.tagList != null)
+    {
+      Tags.Clear();
+      Tags = dto.tagList.Select(tag => new ArticleTag { Name = tag }).ToList();
+    }
   }
 }
 
@@ -65,6 +70,7 @@ public class ArticleUpdateDTO
   public string? title { get; set; }
   public string? description { get; set; }
   public string? body { get; set; }
+  public List<string>? tagList { get; set; }
 }
 
 public class ArticleDTOEnvelope
