@@ -37,7 +37,10 @@ public class Article : BaseEntity
     if (dto.tagList != null)
     {
       Tags.Clear();
-      Tags = dto.tagList.Select(tag => new ArticleTag { Name = tag }).ToList();
+      foreach (var tagName in dto.tagList)
+      {
+        Tags.Add(new ArticleTag { Name = tagName });
+      }
     }
   }
 }
