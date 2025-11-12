@@ -1,1548 +1,1803 @@
 {
-	"info": {
-		"_postman_id": "b28e700a-da19-4aef-8ae6-b6a065defd5b",
-		"name": "RealWorld Dotnet",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "1841370"
-	},
-	"item": [
-		{
-			"name": "Auth",
-			"item": [
-				{
-					"name": "Register",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"const username = pm.variables.replaceIn('{{$randomUserName}}').toLowerCase();",
-									"pm.collectionVariables.set(\"username\", username);",
-									"pm.collectionVariables.set(\"email\", `${username}@mail.com`);",
-									"pm.collectionVariables.set(\"password\", 'password');",
-									""
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Schema is valid', function () {",
-									"    pm.response.to.have.jsonSchema(schemas.authenticatedUser);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"user\": {\n        \"email\": \"{{email}}\",\n        \"password\": \"{{password}}\",\n        \"username\": \"{{username}}\"\n    }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{APIURL}}/users",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Register - Bad request",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 422\", function () {",
-									"    pm.response.to.have.status(422);",
-									"});",
-									"",
-									"pm.test(\"Error is returned\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    const expectedValue = { \"errors\": [ \"#/user.username: PropertyRequired\" ] };",
-									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"user\": {\n        \"email\": \"{{email}}\",\n        \"password\": \"{{password}}\"\n    }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{APIURL}}/users",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Register - Empty request",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 422\", function () {",
-									"    pm.response.to.have.status(422);",
-									"});",
-									"",
-									"pm.test(\"Error is returned\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    const expectedValue = { \"errors\": [ \"Error parsing JSON\" ] };",
-									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{APIURL}}/users",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Schema is valid', function () {",
-									"    pm.response.to.have.jsonSchema(schemas.authenticatedUser);",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('token', jsonData.user.token);",
-									"});",
-									""
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"user\": {\n        \"email\": \"{{email}}\",\n        \"password\": \"{{password}}\"\n    }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{APIURL}}/users/login",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"users",
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login - Bad email",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 401\", function () {",
-									"    pm.response.to.have.status(401);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"user\": {\n        \"email\": \"{{$randomEmail}}\",\n        \"password\": \"{{password}}\"\n    }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{APIURL}}/users/login",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"users",
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login - Bad password",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 401\", function () {",
-									"    pm.response.to.have.status(401);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"user\": {\n        \"email\": \"{{email}}\",\n        \"password\": \"{{$randomPassword}}\"\n    }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{APIURL}}/users/login",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"users",
-								"login"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "User",
-			"item": [
-				{
-					"name": "Current user",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Schema is valid', function () {",
-									"    pm.response.to.have.jsonSchema(schemas.authenticatedUser);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "default"
-							}
-						],
-						"url": {
-							"raw": "{{APIURL}}/user",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"user"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Current user - Bad token",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 401\", function () {",
-									"    pm.response.to.have.status(401);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{$randomUUID}}",
-								"type": "default"
-							}
-						],
-						"url": {
-							"raw": "{{APIURL}}/user",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"user"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Current user - Missing token",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 401\", function () {",
-									"    pm.response.to.have.status(401);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{APIURL}}/user",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"user"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update user",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"const bio = pm.variables.replaceIn('{{$randomCatchPhrase}}');",
-									"const image = `https://loremflickr.com/240/240?rand=${Math.random()}`",
-									"pm.collectionVariables.set(\"bio\", bio);",
-									"pm.collectionVariables.set(\"image\", image);",
-									""
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Schema is valid', function () {",
-									"    pm.response.to.have.jsonSchema(schemas.authenticatedUser);",
-									"});",
-									"",
-									"pm.test(\"Data is correct\", function() {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.user.bio).to.eql(pm.collectionVariables.get(\"bio\"));",
-									"    pm.expect(jsonData.user.image).to.eql(pm.collectionVariables.get(\"image\"));",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "default"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"user\": {\n    \"bio\": \"{{bio}}\",\n    \"image\": \"{{image}}\"\n  }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{APIURL}}/user",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"user"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update user - Only email",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Schema is valid', function () {",
-									"    pm.response.to.have.jsonSchema(schemas.authenticatedUser);",
-									"});",
-									"",
-									"pm.test(\"Data is correct\", function() {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.user.email).to.eql(pm.collectionVariables.get(\"email\"));",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "default"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"user\": {\n      \"email\": \"{{email}}\"\n  }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{APIURL}}/user",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"user"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update user - Bad request",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 422\", function () {",
-									"    pm.response.to.have.status(422);",
-									"});",
-									"",
-									"pm.test(\"Error is returned\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    const expectedValue = { \"errors\": [ \"#/user: PropertyRequired\", \"#/xuser: NoAdditionalPropertiesAllowed\" ] };",
-									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "default"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"xuser\": {\n    \"bio\": \"{{bio}}\",\n    \"image\": \"{{image}}\"\n  }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{APIURL}}/user",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"user"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update user - No mutations",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 422\", function () {",
-									"    pm.response.to.have.status(422);",
-									"});",
-									"",
-									"pm.test(\"Error is returned\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    const expectedValue = { \"errors\": { \"user\": [ \"At least one field must be updated\" ] } };",
-									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "default"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"user\": {\n  }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{APIURL}}/user",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"user"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Profile",
-			"item": [
-				{
-					"name": "Register celeb user",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"const username = pm.variables.replaceIn('celeb-{{$randomUserName}}').toLowerCase();",
-									"pm.collectionVariables.set(\"celeb-username\", username);",
-									"pm.collectionVariables.set(\"celeb-email\", `${username}@mail.com`);",
-									"pm.collectionVariables.set(\"celeb-password\", 'password');",
-									""
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Schema is valid', function () {",
-									"    pm.response.to.have.jsonSchema(schemas.authenticatedUser);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"user\": {\n        \"email\": \"{{celeb-email}}\",\n        \"password\": \"{{celeb-password}}\",\n        \"username\": \"{{celeb-username}}\"\n    }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{APIURL}}/users",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get profile",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Schema is valid\", function () {",
-									"    pm.response.to.have.jsonSchema(schemas.profile);",
-									"});",
-									"",
-									"pm.test(\"Data is correct\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    expectedValue = {",
-									"        profile: {",
-									"            username: pm.collectionVariables.get('celeb-username'),",
-									"            bio: \"\",",
-									"            image: \"\",",
-									"            following: false,",
-									"        }",
-									"    };",
-									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{APIURL}}/profiles/{{celeb-username}}",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"profiles",
-								"{{celeb-username}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get profile - Unknown",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 404\", function () {",
-									"    pm.response.to.have.status(404);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{APIURL}}/profiles/{{$randomUserName}}",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"profiles",
-								"{{$randomUserName}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Follow",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Schema is valid\", function () {",
-									"    pm.response.to.have.jsonSchema(schemas.profile);",
-									"});",
-									"",
-									"pm.test(\"Data is correct\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    expectedValue = {",
-									"        profile: {",
-									"            username: pm.collectionVariables.get('celeb-username'),",
-									"            bio: \"\",",
-									"            image: \"\",",
-									"            following: true,",
-									"        }",
-									"    };",
-									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "default"
-							}
-						],
-						"url": {
-							"raw": "{{APIURL}}/profiles/{{celeb-username}}/follow",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"profiles",
-								"{{celeb-username}}",
-								"follow"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Follow - Again",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Schema is valid\", function () {",
-									"    pm.response.to.have.jsonSchema(schemas.profile);",
-									"});",
-									"",
-									"pm.test(\"Data is correct\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    expectedValue = {",
-									"        profile: {",
-									"            username: pm.collectionVariables.get('celeb-username'),",
-									"            bio: \"\",",
-									"            image: \"\",",
-									"            following: true,",
-									"        }",
-									"    };",
-									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "default"
-							}
-						],
-						"url": {
-							"raw": "{{APIURL}}/profiles/{{celeb-username}}/follow",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"profiles",
-								"{{celeb-username}}",
-								"follow"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Follow - Unknown",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 404\", function () {",
-									"    pm.response.to.have.status(404);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "default"
-							}
-						],
-						"url": {
-							"raw": "{{APIURL}}/profiles/{{$randomUserName}}/follow",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"profiles",
-								"{{$randomUserName}}",
-								"follow"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get profile - After follow",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Schema is valid\", function () {",
-									"    pm.response.to.have.jsonSchema(schemas.profile);",
-									"});",
-									"",
-									"pm.test(\"Data is correct\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    expectedValue = {",
-									"        profile: {",
-									"            username: pm.collectionVariables.get('celeb-username'),",
-									"            bio: \"\",",
-									"            image: \"\",",
-									"            following: true,",
-									"        }",
-									"    };",
-									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "default"
-							}
-						],
-						"url": {
-							"raw": "{{APIURL}}/profiles/{{celeb-username}}",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"profiles",
-								"{{celeb-username}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Unfollow",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Schema is valid\", function () {",
-									"    pm.response.to.have.jsonSchema(schemas.profile);",
-									"});",
-									"",
-									"pm.test(\"Data is correct\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    expectedValue = {",
-									"        profile: {",
-									"            username: pm.collectionVariables.get('celeb-username'),",
-									"            bio: \"\",",
-									"            image: \"\",",
-									"            following: false,",
-									"        }",
-									"    };",
-									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "default"
-							}
-						],
-						"url": {
-							"raw": "{{APIURL}}/profiles/{{celeb-username}}/follow",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"profiles",
-								"{{celeb-username}}",
-								"follow"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Unfollow - Again",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Schema is valid\", function () {",
-									"    pm.response.to.have.jsonSchema(schemas.profile);",
-									"});",
-									"",
-									"pm.test(\"Data is correct\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    expectedValue = {",
-									"        profile: {",
-									"            username: pm.collectionVariables.get('celeb-username'),",
-									"            bio: \"\",",
-									"            image: \"\",",
-									"            following: false,",
-									"        }",
-									"    };",
-									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "default"
-							}
-						],
-						"url": {
-							"raw": "{{APIURL}}/profiles/{{celeb-username}}/follow",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"profiles",
-								"{{celeb-username}}",
-								"follow"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Unfollow - Unknown",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 404\", function () {",
-									"    pm.response.to.have.status(404);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "default"
-							}
-						],
-						"url": {
-							"raw": "{{APIURL}}/profiles/{{$randomUserName}}/follow",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"profiles",
-								"{{$randomUserName}}",
-								"follow"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Article",
-			"item": [
-				{
-					"name": "Create Article",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"pm.collectionVariables.set(\"articleTitle\", pm.variables.replaceIn(\"{{$randomLoremSentence}}\"));",
-									"pm.collectionVariables.set(\"articleDescription\", pm.variables.replaceIn(\"{{$randomLoremSentence}}\"));",
-									"pm.collectionVariables.set(\"articleBody\", pm.variables.replaceIn(\"{{$randomLoremSentences}}\"));",
-									"pm.collectionVariables.set(\"articleTag1\", pm.variables.replaceIn(\"{{$randomLoremWord}}\"));",
-									"pm.collectionVariables.set(\"articleTag2\", pm.variables.replaceIn(\"{{$randomLoremWord}}\"));",
-									"pm.collectionVariables.set(\"articleTag3\", pm.variables.replaceIn(\"{{$randomLoremWord}}\"));",
-									""
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('Schema is valid', function () {",
-									"    pm.response.to.have.jsonSchema(schemas.article);",
-									"});",
-									"",
-									"pm.test(\"Data is correct\", function() {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.article.title).to.eql(pm.collectionVariables.get(\"articleTitle\"));",
-									"    pm.expect(jsonData.article.description).to.eql(pm.collectionVariables.get(\"articleDescription\"));",
-									"    pm.expect(jsonData.article.body).to.eql(pm.collectionVariables.get(\"articleBody\"));",
-									"",
-									"    // Capture article slug for future use",
-									"    pm.collectionVariables.set(\"articleSlug\", jsonData.article.slug);",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "default"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"article\": {\n        \"title\": \"{{articleTitle}}\",\n        \"description\": \"{{articleDescription}}\",\n        \"body\": \"{{articleBody}}\",\n        \"tagList\": [\"{{articleTag1}}\", \"{{articleTag2}}\", \"{{articleTag3}}\"]\n    }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{APIURL}}/articles",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"articles"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create Article - Bad request",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 422\", function () {",
-									"    pm.response.to.have.status(422);",
-									"});",
-									"",
-									"pm.test(\"Error is returned\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    const expectedValue = { \"errors\": [ \"#/article: PropertyRequired\", \"#/foo: NoAdditionalPropertiesAllowed\" ] };",
-									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "default"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"foo\": \"bar\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{APIURL}}/articles",
-							"host": [
-								"{{APIURL}}"
-							],
-							"path": [
-								"articles"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"requests": {},
-				"exec": [
-					"schemas = {",
-					"  authenticatedUser: {",
-					"    \"type\": \"object\",",
-					"    \"properties\": {",
-					"      \"user\": {",
-					"        \"type\": \"object\",",
-					"        \"properties\": {",
-					"          \"email\": {",
-					"            \"type\": \"string\"",
-					"          },",
-					"          \"token\": {",
-					"            \"type\": \"string\"",
-					"          },",
-					"          \"username\": {",
-					"            \"type\": \"string\"",
-					"          },",
-					"          \"bio\": {",
-					"            \"type\": [\"string\", \"null\"]",
-					"          },",
-					"          \"image\": {",
-					"            \"type\": [\"string\", \"null\"]",
-					"          }",
-					"        },",
-					"        \"additionalProperties\": false,",
-					"        \"required\": [",
-					"          \"email\",",
-					"          \"token\",",
-					"          \"username\",",
-					"        ]",
-					"      }",
-					"    },",
-					"    \"additionalProperties\": false,",
-					"    \"required\": [",
-					"      \"user\"",
-					"    ]",
-					"  },",
-					"  profile: {",
-					"    \"type\": \"object\",",
-					"    \"properties\": {",
-					"      \"profile\": {",
-					"        \"type\": \"object\",",
-					"        \"properties\": {",
-					"          \"username\": {",
-					"            \"type\": \"string\"",
-					"          },",
-					"          \"bio\": {",
-					"            \"type\": \"string\"",
-					"          },",
-					"          \"image\": {",
-					"            \"type\": \"string\"",
-					"          },",
-					"          \"following\": {",
-					"            \"type\": \"boolean\"",
-					"          }",
-					"        },",
-					"        \"required\": [",
-					"          \"username\",",
-					"          \"bio\",",
-					"          \"image\",",
-					"          \"following\"",
-					"        ]",
-					"      }",
-					"    },",
-					"    \"required\": [",
-					"      \"profile\"",
-					"    ]",
-					"  },",
-					"  article: {",
-					"    \"type\": \"object\",",
-					"    \"properties\": {",
-					"      \"article\": {",
-					"        \"type\": \"object\",",
-					"        \"properties\": {",
-					"          \"slug\": { \"type\": \"string\" },",
-					"          \"title\": { \"type\": \"string\" },",
-					"          \"description\": { \"type\": \"string\" },",
-					"          \"body\": { \"type\": \"string\" },",
-					"          \"tagList\": {",
-					"            \"type\": \"array\",",
-					"            \"items\": { \"type\": \"string\" }",
-					"          },",
-					"          \"createdAt\": {",
-					"            \"type\": \"string\",",
-					"            \"format\": \"date-time\"",
-					"          },",
-					"          \"updatedAt\": {",
-					"            \"type\": \"string\",",
-					"            \"format\": \"date-time\"",
-					"          },",
-					"          \"favorited\": { \"type\": \"boolean\" },",
-					"          \"favoritesCount\": { \"type\": \"integer\" },",
-					"          \"author\": {",
-					"            \"type\": \"object\",",
-					"            \"properties\": {",
-					"              \"username\": { \"type\": \"string\" },",
-					"              \"bio\": { \"type\": \"string\" },",
-					"              \"image\": { \"type\": \"string\" },",
-					"              \"following\": { \"type\": \"boolean\" }",
-					"            },",
-					"            \"required\": [\"username\", \"bio\", \"image\", \"following\"],",
-					"            \"additionalProperties\": false",
-					"          }",
-					"        },",
-					"        \"required\": [",
-					"          \"slug\",",
-					"          \"title\",",
-					"          \"description\",",
-					"          \"body\",",
-					"          \"tagList\",",
-					"          \"createdAt\",",
-					"          \"updatedAt\",",
-					"          \"favorited\",",
-					"          \"favoritesCount\",",
-					"          \"author\"",
-					"        ],",
-					"        \"additionalProperties\": false",
-					"      }",
-					"    },",
-					"    \"required\": [\"article\"],",
-					"    \"additionalProperties\": false",
-					"  }",
-					"",
-					"}"
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"requests": {},
-				"exec": [
-					""
-				]
-			}
-		}
-	],
-	"variable": [
-		{
-			"key": "APIURL",
-			"value": "http://localhost:3000/api"
-		},
-		{
-			"key": "username",
-			"value": ""
-		},
-		{
-			"key": "email",
-			"value": ""
-		},
-		{
-			"key": "password",
-			"value": ""
-		},
-		{
-			"key": "token",
-			"value": ""
-		},
-		{
-			"key": "bio",
-			"value": ""
-		},
-		{
-			"key": "image",
-			"value": ""
-		},
-		{
-			"key": "celeb-username",
-			"value": ""
-		},
-		{
-			"key": "celeb-email",
-			"value": ""
-		},
-		{
-			"key": "celeb-password",
-			"value": ""
-		},
-		{
-			"key": "articleTitle",
-			"value": ""
-		},
-		{
-			"key": "articleDescription",
-			"value": ""
-		},
-		{
-			"key": "articleBody",
-			"value": ""
-		},
-		{
-			"key": "articleTags",
-			"value": ""
-		},
-		{
-			"key": "articleTag1",
-			"value": ""
-		},
-		{
-			"key": "articleTag2",
-			"value": ""
-		},
-		{
-			"key": "articleTag3",
-			"value": ""
-		},
-		{
-			"key": "articleSlug",
-			"value": ""
-		}
-	]
+  "info": {
+    "_postman_id": "b28e700a-da19-4aef-8ae6-b6a065defd5b",
+    "name": "RealWorld Dotnet",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "1841370"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const username = pm.variables.replaceIn('{{$randomUserName}}').toLowerCase();",
+                  "pm.collectionVariables.set(\"username\", username);",
+                  "pm.collectionVariables.set(\"email\", `${username}@mail.com`);",
+                  "pm.collectionVariables.set(\"password\", 'password');",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Schema is valid', function () {",
+                  "    pm.response.to.have.jsonSchema(schemas.authenticatedUser);",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user\": {\n        \"email\": \"{{email}}\",\n        \"password\": \"{{password}}\",\n        \"username\": \"{{username}}\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/users",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register - Bad request",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 422\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "",
+                  "pm.test(\"Error is returned\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    const expectedValue = { \"errors\": [ \"#/user.username: PropertyRequired\" ] };",
+                  "    pm.expect(jsonData).to.deep.equal(expectedValue);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user\": {\n        \"email\": \"{{email}}\",\n        \"password\": \"{{password}}\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/users",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register - Empty request",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 422\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "",
+                  "pm.test(\"Error is returned\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    const expectedValue = { \"errors\": [ \"Error parsing JSON\" ] };",
+                  "    pm.expect(jsonData).to.deep.equal(expectedValue);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/users",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Schema is valid', function () {",
+                  "    pm.response.to.have.jsonSchema(schemas.authenticatedUser);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('token', jsonData.user.token);",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user\": {\n        \"email\": \"{{email}}\",\n        \"password\": \"{{password}}\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/users/login",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "users",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Bad email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user\": {\n        \"email\": \"{{$randomEmail}}\",\n        \"password\": \"{{password}}\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/users/login",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "users",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Bad password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user\": {\n        \"email\": \"{{email}}\",\n        \"password\": \"{{$randomPassword}}\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/users/login",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "users",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Current user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Schema is valid', function () {",
+                  "    pm.response.to.have.jsonSchema(schemas.authenticatedUser);",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "url": {
+              "raw": "{{APIURL}}/user",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Current user - Bad token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{$randomUUID}}",
+                "type": "default"
+              }
+            ],
+            "url": {
+              "raw": "{{APIURL}}/user",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Current user - Missing token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{APIURL}}/user",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update user",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const bio = pm.variables.replaceIn('{{$randomCatchPhrase}}');",
+                  "const image = `https://loremflickr.com/240/240?rand=${Math.random()}`",
+                  "pm.collectionVariables.set(\"bio\", bio);",
+                  "pm.collectionVariables.set(\"image\", image);",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Schema is valid', function () {",
+                  "    pm.response.to.have.jsonSchema(schemas.authenticatedUser);",
+                  "});",
+                  "",
+                  "pm.test(\"Data is correct\", function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.user.bio).to.eql(pm.collectionVariables.get(\"bio\"));",
+                  "    pm.expect(jsonData.user.image).to.eql(pm.collectionVariables.get(\"image\"));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"bio\": \"{{bio}}\",\n    \"image\": \"{{image}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/user",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update user - Only email",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Schema is valid', function () {",
+                  "    pm.response.to.have.jsonSchema(schemas.authenticatedUser);",
+                  "});",
+                  "",
+                  "pm.test(\"Data is correct\", function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.user.email).to.eql(pm.collectionVariables.get(\"email\"));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n      \"email\": \"{{email}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/user",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update user - Bad request",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 422\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "",
+                  "pm.test(\"Error is returned\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    const expectedValue = { \"errors\": [ \"#/user: PropertyRequired\", \"#/xuser: NoAdditionalPropertiesAllowed\" ] };",
+                  "    pm.expect(jsonData).to.deep.equal(expectedValue);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"xuser\": {\n    \"bio\": \"{{bio}}\",\n    \"image\": \"{{image}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/user",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update user - No mutations",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 422\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "",
+                  "pm.test(\"Error is returned\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    const expectedValue = { \"errors\": { \"user\": [ \"At least one field must be updated\" ] } };",
+                  "    pm.expect(jsonData).to.deep.equal(expectedValue);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/user",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "user"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Register celeb user",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const username = pm.variables.replaceIn('celeb-{{$randomUserName}}').toLowerCase();",
+                  "pm.collectionVariables.set(\"celeb-username\", username);",
+                  "pm.collectionVariables.set(\"celeb-email\", `${username}@mail.com`);",
+                  "pm.collectionVariables.set(\"celeb-password\", 'password');",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Schema is valid', function () {",
+                  "    pm.response.to.have.jsonSchema(schemas.authenticatedUser);",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user\": {\n        \"email\": \"{{celeb-email}}\",\n        \"password\": \"{{celeb-password}}\",\n        \"username\": \"{{celeb-username}}\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/users",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Schema is valid\", function () {",
+                  "    pm.response.to.have.jsonSchema(schemas.profile);",
+                  "});",
+                  "",
+                  "pm.test(\"Data is correct\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    expectedValue = {",
+                  "        profile: {",
+                  "            username: pm.collectionVariables.get('celeb-username'),",
+                  "            bio: \"\",",
+                  "            image: \"\",",
+                  "            following: false,",
+                  "        }",
+                  "    };",
+                  "    pm.expect(jsonData).to.deep.equal(expectedValue);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{APIURL}}/profiles/{{celeb-username}}",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "profiles",
+                "{{celeb-username}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get profile - Unknown",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{APIURL}}/profiles/{{$randomUserName}}",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "profiles",
+                "{{$randomUserName}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Follow",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Schema is valid\", function () {",
+                  "    pm.response.to.have.jsonSchema(schemas.profile);",
+                  "});",
+                  "",
+                  "pm.test(\"Data is correct\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    expectedValue = {",
+                  "        profile: {",
+                  "            username: pm.collectionVariables.get('celeb-username'),",
+                  "            bio: \"\",",
+                  "            image: \"\",",
+                  "            following: true,",
+                  "        }",
+                  "    };",
+                  "    pm.expect(jsonData).to.deep.equal(expectedValue);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "url": {
+              "raw": "{{APIURL}}/profiles/{{celeb-username}}/follow",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "profiles",
+                "{{celeb-username}}",
+                "follow"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Follow - Again",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Schema is valid\", function () {",
+                  "    pm.response.to.have.jsonSchema(schemas.profile);",
+                  "});",
+                  "",
+                  "pm.test(\"Data is correct\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    expectedValue = {",
+                  "        profile: {",
+                  "            username: pm.collectionVariables.get('celeb-username'),",
+                  "            bio: \"\",",
+                  "            image: \"\",",
+                  "            following: true,",
+                  "        }",
+                  "    };",
+                  "    pm.expect(jsonData).to.deep.equal(expectedValue);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "url": {
+              "raw": "{{APIURL}}/profiles/{{celeb-username}}/follow",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "profiles",
+                "{{celeb-username}}",
+                "follow"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Follow - Unknown",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "url": {
+              "raw": "{{APIURL}}/profiles/{{$randomUserName}}/follow",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "profiles",
+                "{{$randomUserName}}",
+                "follow"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get profile - After follow",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Schema is valid\", function () {",
+                  "    pm.response.to.have.jsonSchema(schemas.profile);",
+                  "});",
+                  "",
+                  "pm.test(\"Data is correct\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    expectedValue = {",
+                  "        profile: {",
+                  "            username: pm.collectionVariables.get('celeb-username'),",
+                  "            bio: \"\",",
+                  "            image: \"\",",
+                  "            following: true,",
+                  "        }",
+                  "    };",
+                  "    pm.expect(jsonData).to.deep.equal(expectedValue);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "url": {
+              "raw": "{{APIURL}}/profiles/{{celeb-username}}",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "profiles",
+                "{{celeb-username}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unfollow",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Schema is valid\", function () {",
+                  "    pm.response.to.have.jsonSchema(schemas.profile);",
+                  "});",
+                  "",
+                  "pm.test(\"Data is correct\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    expectedValue = {",
+                  "        profile: {",
+                  "            username: pm.collectionVariables.get('celeb-username'),",
+                  "            bio: \"\",",
+                  "            image: \"\",",
+                  "            following: false,",
+                  "        }",
+                  "    };",
+                  "    pm.expect(jsonData).to.deep.equal(expectedValue);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "url": {
+              "raw": "{{APIURL}}/profiles/{{celeb-username}}/follow",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "profiles",
+                "{{celeb-username}}",
+                "follow"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unfollow - Again",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Schema is valid\", function () {",
+                  "    pm.response.to.have.jsonSchema(schemas.profile);",
+                  "});",
+                  "",
+                  "pm.test(\"Data is correct\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    expectedValue = {",
+                  "        profile: {",
+                  "            username: pm.collectionVariables.get('celeb-username'),",
+                  "            bio: \"\",",
+                  "            image: \"\",",
+                  "            following: false,",
+                  "        }",
+                  "    };",
+                  "    pm.expect(jsonData).to.deep.equal(expectedValue);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "url": {
+              "raw": "{{APIURL}}/profiles/{{celeb-username}}/follow",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "profiles",
+                "{{celeb-username}}",
+                "follow"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unfollow - Unknown",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "url": {
+              "raw": "{{APIURL}}/profiles/{{$randomUserName}}/follow",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "profiles",
+                "{{$randomUserName}}",
+                "follow"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Article",
+      "item": [
+        {
+          "name": "Create Article",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.collectionVariables.set(\"articleTitle\", pm.variables.replaceIn(\"{{$randomLoremSentence}}\"));",
+                  "pm.collectionVariables.set(\"articleDescription\", pm.variables.replaceIn(\"{{$randomLoremSentence}}\"));",
+                  "pm.collectionVariables.set(\"articleBody\", pm.variables.replaceIn(\"{{$randomLoremSentences}}\"));",
+                  "pm.collectionVariables.set(\"articleTag1\", pm.variables.replaceIn(\"{{$randomLoremWord}}\"));",
+                  "pm.collectionVariables.set(\"articleTag2\", pm.variables.replaceIn(\"{{$randomLoremWord}}\"));",
+                  "pm.collectionVariables.set(\"articleTag3\", pm.variables.replaceIn(\"{{$randomLoremWord}}\"));",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Schema is valid', function () {",
+                  "    pm.response.to.have.jsonSchema(schemas.article);",
+                  "});",
+                  "",
+                  "pm.test(\"Data is correct\", function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.article.title).to.eql(pm.collectionVariables.get(\"articleTitle\"));",
+                  "    pm.expect(jsonData.article.description).to.eql(pm.collectionVariables.get(\"articleDescription\"));",
+                  "    pm.expect(jsonData.article.body).to.eql(pm.collectionVariables.get(\"articleBody\"));",
+                  "",
+                  "    // Capture article slug for future use",
+                  "    pm.collectionVariables.set(\"articleSlug\", jsonData.article.slug);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"article\": {\n        \"title\": \"{{articleTitle}}\",\n        \"description\": \"{{articleDescription}}\",\n        \"body\": \"{{articleBody}}\",\n        \"tagList\": [\"{{articleTag1}}\", \"{{articleTag2}}\", \"{{articleTag3}}\"]\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/articles",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "articles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Article - Bad request",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 422\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "",
+                  "pm.test(\"Error is returned\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    const expectedValue = { \"errors\": [ \"#/article: PropertyRequired\", \"#/foo: NoAdditionalPropertiesAllowed\" ] };",
+                  "    pm.expect(jsonData).to.deep.equal(expectedValue);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"foo\": \"bar\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/articles",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "articles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Article",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.collectionVariables.set(\"updatedArticleTitle\", pm.variables.replaceIn(\"{{$randomLoremSentence}}\"));",
+                  "pm.collectionVariables.set(\"updatedArticleDescription\", pm.variables.replaceIn(\"{{$randomLoremSentence}}\"));",
+                  "pm.collectionVariables.set(\"updatedArticleBody\", pm.variables.replaceIn(\"{{$randomLoremSentences}}\"));",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Schema is valid', function () {",
+                  "    pm.response.to.have.jsonSchema(schemas.article);",
+                  "});",
+                  "",
+                  "pm.test(\"Data is correct\", function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.article.title).to.eql(pm.collectionVariables.get(\"updatedArticleTitle\"));",
+                  "    pm.expect(jsonData.article.description).to.eql(pm.collectionVariables.get(\"updatedArticleDescription\"));",
+                  "    pm.expect(jsonData.article.body).to.eql(pm.collectionVariables.get(\"updatedArticleBody\"));",
+                  "    ",
+                  "    // Check that slug changed because title changed",
+                  "    pm.expect(jsonData.article.slug).to.not.eql(pm.collectionVariables.get(\"articleSlug\"));",
+                  "    ",
+                  "    // Update the slug for future tests",
+                  "    pm.collectionVariables.set(\"articleSlug\", jsonData.article.slug);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"article\": {\n        \"title\": \"{{updatedArticleTitle}}\",\n        \"description\": \"{{updatedArticleDescription}}\",\n        \"body\": \"{{updatedArticleBody}}\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/articles/{{articleSlug}}",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "articles",
+                "{{articleSlug}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Article - Partial update",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.collectionVariables.set(\"partialUpdatedArticleBody\", pm.variables.replaceIn(\"{{$randomLoremSentences}}\"));",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Schema is valid', function () {",
+                  "    pm.response.to.have.jsonSchema(schemas.article);",
+                  "});",
+                  "",
+                  "pm.test(\"Data is correct\", function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    // Title and description should remain the same",
+                  "    pm.expect(jsonData.article.title).to.eql(pm.collectionVariables.get(\"updatedArticleTitle\"));",
+                  "    pm.expect(jsonData.article.description).to.eql(pm.collectionVariables.get(\"updatedArticleDescription\"));",
+                  "    // Body should be updated",
+                  "    pm.expect(jsonData.article.body).to.eql(pm.collectionVariables.get(\"partialUpdatedArticleBody\"));",
+                  "    // Slug should remain the same since title didn't change",
+                  "    pm.expect(jsonData.article.slug).to.eql(pm.collectionVariables.get(\"articleSlug\"));",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"article\": {\n        \"body\": \"{{partialUpdatedArticleBody}}\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/articles/{{articleSlug}}",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "articles",
+                "{{articleSlug}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Article - Bad request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 422\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "",
+                  "pm.test(\"Error is returned\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.errors).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"article\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/articles/{{articleSlug}}",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "articles",
+                "{{articleSlug}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Article - Not found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "default"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"article\": {\n        \"title\": \"Updated Title\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIURL}}/articles/non-existent-slug",
+              "host": [
+                "{{APIURL}}"
+              ],
+              "path": [
+                "articles",
+                "non-existent-slug"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "requests": {},
+        "exec": [
+          "schemas = {",
+          "  authenticatedUser: {",
+          "    \"type\": \"object\",",
+          "    \"properties\": {",
+          "      \"user\": {",
+          "        \"type\": \"object\",",
+          "        \"properties\": {",
+          "          \"email\": {",
+          "            \"type\": \"string\"",
+          "          },",
+          "          \"token\": {",
+          "            \"type\": \"string\"",
+          "          },",
+          "          \"username\": {",
+          "            \"type\": \"string\"",
+          "          },",
+          "          \"bio\": {",
+          "            \"type\": [\"string\", \"null\"]",
+          "          },",
+          "          \"image\": {",
+          "            \"type\": [\"string\", \"null\"]",
+          "          }",
+          "        },",
+          "        \"additionalProperties\": false,",
+          "        \"required\": [",
+          "          \"email\",",
+          "          \"token\",",
+          "          \"username\",",
+          "        ]",
+          "      }",
+          "    },",
+          "    \"additionalProperties\": false,",
+          "    \"required\": [",
+          "      \"user\"",
+          "    ]",
+          "  },",
+          "  profile: {",
+          "    \"type\": \"object\",",
+          "    \"properties\": {",
+          "      \"profile\": {",
+          "        \"type\": \"object\",",
+          "        \"properties\": {",
+          "          \"username\": {",
+          "            \"type\": \"string\"",
+          "          },",
+          "          \"bio\": {",
+          "            \"type\": \"string\"",
+          "          },",
+          "          \"image\": {",
+          "            \"type\": \"string\"",
+          "          },",
+          "          \"following\": {",
+          "            \"type\": \"boolean\"",
+          "          }",
+          "        },",
+          "        \"required\": [",
+          "          \"username\",",
+          "          \"bio\",",
+          "          \"image\",",
+          "          \"following\"",
+          "        ]",
+          "      }",
+          "    },",
+          "    \"required\": [",
+          "      \"profile\"",
+          "    ]",
+          "  },",
+          "  article: {",
+          "    \"type\": \"object\",",
+          "    \"properties\": {",
+          "      \"article\": {",
+          "        \"type\": \"object\",",
+          "        \"properties\": {",
+          "          \"slug\": { \"type\": \"string\" },",
+          "          \"title\": { \"type\": \"string\" },",
+          "          \"description\": { \"type\": \"string\" },",
+          "          \"body\": { \"type\": \"string\" },",
+          "          \"tagList\": {",
+          "            \"type\": \"array\",",
+          "            \"items\": { \"type\": \"string\" }",
+          "          },",
+          "          \"createdAt\": {",
+          "            \"type\": \"string\",",
+          "            \"format\": \"date-time\"",
+          "          },",
+          "          \"updatedAt\": {",
+          "            \"type\": \"string\",",
+          "            \"format\": \"date-time\"",
+          "          },",
+          "          \"favorited\": { \"type\": \"boolean\" },",
+          "          \"favoritesCount\": { \"type\": \"integer\" },",
+          "          \"author\": {",
+          "            \"type\": \"object\",",
+          "            \"properties\": {",
+          "              \"username\": { \"type\": \"string\" },",
+          "              \"bio\": { \"type\": \"string\" },",
+          "              \"image\": { \"type\": \"string\" },",
+          "              \"following\": { \"type\": \"boolean\" }",
+          "            },",
+          "            \"required\": [\"username\", \"bio\", \"image\", \"following\"],",
+          "            \"additionalProperties\": false",
+          "          }",
+          "        },",
+          "        \"required\": [",
+          "          \"slug\",",
+          "          \"title\",",
+          "          \"description\",",
+          "          \"body\",",
+          "          \"tagList\",",
+          "          \"createdAt\",",
+          "          \"updatedAt\",",
+          "          \"favorited\",",
+          "          \"favoritesCount\",",
+          "          \"author\"",
+          "        ],",
+          "        \"additionalProperties\": false",
+          "      }",
+          "    },",
+          "    \"required\": [\"article\"],",
+          "    \"additionalProperties\": false",
+          "  }",
+          "",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "APIURL",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "username",
+      "value": ""
+    },
+    {
+      "key": "email",
+      "value": ""
+    },
+    {
+      "key": "password",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "bio",
+      "value": ""
+    },
+    {
+      "key": "image",
+      "value": ""
+    },
+    {
+      "key": "celeb-username",
+      "value": ""
+    },
+    {
+      "key": "celeb-email",
+      "value": ""
+    },
+    {
+      "key": "celeb-password",
+      "value": ""
+    },
+    {
+      "key": "articleTitle",
+      "value": ""
+    },
+    {
+      "key": "articleDescription",
+      "value": ""
+    },
+    {
+      "key": "articleBody",
+      "value": ""
+    },
+    {
+      "key": "articleTags",
+      "value": ""
+    },
+    {
+      "key": "articleTag1",
+      "value": ""
+    },
+    {
+      "key": "articleTag2",
+      "value": ""
+    },
+    {
+      "key": "articleTag3",
+      "value": ""
+    },
+    {
+      "key": "articleSlug",
+      "value": ""
+    }
+  ]
 }

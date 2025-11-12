@@ -90,3 +90,16 @@ public class ArticleAuthor
   public string image { get; set; } = "";
   public bool following { get; set; } = false;
 }
+
+public class ArticleUpdateDTOEnvelope
+{
+  [Required]
+  public ArticleUpdateDTO article { get; set; } = new ArticleUpdateDTO();
+}
+
+public class ArticleUpdateDTO
+{
+  public string? title { get; set; }
+  public string? description { get; set; }
+  public string? body { get; set; }
+}
