@@ -24,6 +24,17 @@ public class Article : BaseEntity
       Tags = article.tagList.Select(tag => new ArticleTag { Name = tag }).ToList()
     };
   }
+
+  public void UpdateFromDTO(ArticleUpdateDTO dto)
+  {
+    if (dto.title != null)
+    {
+      Title = dto.title;
+      Slug = new SlugHelper().GenerateSlug(dto.title + "-" + Guid.NewGuid().ToString().Substring(0, 8));
+    }
+    if (dto.description != null) Description = dto.description;
+    if (dto.body != null) Body = dto.body;
+  }
 }
 
 public class ArticleCreationDTOEnvelope
@@ -41,6 +52,19 @@ public class ArticleCreationDTO
   [Required]
   public string body { get; set; } = "";
   public List<string> tagList { get; set; } = new List<string>();
+}
+
+public class ArticleUpdateDTOEnvelope
+{
+  [Required]
+  public ArticleUpdateDTO article { get; set; } = new ArticleUpdateDTO();
+}
+
+public class ArticleUpdateDTO
+{
+  public string? title { get; set; }
+  public string? description { get; set; }
+  public string? body { get; set; }
 }
 
 public class ArticleDTOEnvelope
@@ -79,7 +103,6 @@ public class ArticleDTO
   public string updatedAt { get; set; } = "";
   public bool favorited { get; set; } = false;
   public int favoritesCount { get; set; } = 0;
-
   public ArticleAuthor author { get; set; } = null!;
 }
 

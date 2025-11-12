@@ -701,7 +701,9 @@
 									"pm.collectionVariables.set(\"celeb-password\", 'password');",
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						},
 						{
@@ -714,10 +716,14 @@
 									"",
 									"pm.test('Schema is valid', function () {",
 									"    pm.response.to.have.jsonSchema(schemas.authenticatedUser);",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('celeb-token', jsonData.user.token);",
 									"});",
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
@@ -1323,6 +1329,274 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Update Article",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"articleTitle\", pm.variables.replaceIn(\"{{$randomLoremSentence}}\"));",
+									"pm.collectionVariables.set(\"articleDescription\", pm.variables.replaceIn(\"{{$randomLoremSentence}}\"));",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Schema is valid', function () {",
+									"  pm.response.to.have.jsonSchema(schemas.article);",
+									"});",
+									"",
+									"pm.test(\"Data is correct\", function () {",
+									"  var jsonData = pm.response.json();",
+									"  pm.expect(jsonData.article.title).to.eql(pm.collectionVariables.get(\"articleTitle\"));",
+									"  pm.expect(jsonData.article.description).to.eql(pm.collectionVariables.get(\"articleDescription\"));",
+									"  pm.expect(jsonData.article.body).to.eql(pm.collectionVariables.get(\"articleBody\"));",
+									"",
+									"  // Assert that slug has changed",
+									"  pm.expect(jsonData.article.slug).to.not.eql(pm.collectionVariables.get(\"articleSlug\"));",
+									"",
+									"  // Assert updatedAt is greater than createdAt",
+									"  var createdAt = new Date(jsonData.article.createdAt);",
+									"  var updatedAt = new Date(jsonData.article.updatedAt);",
+									"  pm.expect(updatedAt).to.be.greaterThan(createdAt);",
+									"",
+									"  // Capture article slug for future use",
+									"  pm.collectionVariables.set(\"articleSlug\", jsonData.article.slug);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"article\": {\n        \"title\": \"{{articleTitle}}\",\n        \"description\": \"{{articleDescription}}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/articles/{{articleSlug}}",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"articles",
+								"{{articleSlug}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Article - Bad request",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422\", function () {",
+									"    pm.response.to.have.status(422);",
+									"});",
+									"",
+									"pm.test(\"Error is returned\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const expectedValue = { \"errors\": [ \"#/article: PropertyRequired\", \"#/xarticle: NoAdditionalPropertiesAllowed\" ] };",
+									"    pm.expect(jsonData).to.deep.equal(expectedValue);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"xarticle\": {\n        \"title\": \"{{articleTitle}}\",\n        \"description\": \"{{articleDescription}}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/articles/{{articleSlug}}",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"articles",
+								"{{articleSlug}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Article - Unknown slug",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"article\": {\n        \"title\": \"{{articleTitle}}\",\n        \"description\": \"{{articleDescription}}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/articles/{{$randomAlphaNumeric}}",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"articles",
+								"{{$randomAlphaNumeric}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Article - Forbidden",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{celeb-token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"article\": {\n        \"title\": \"{{articleTitle}}\",\n        \"description\": \"{{articleDescription}}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/articles/{{articleSlug}}",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"articles",
+								"{{articleSlug}}"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}
@@ -1542,6 +1816,10 @@
 		},
 		{
 			"key": "articleSlug",
+			"value": ""
+		},
+		{
+			"key": "celeb-token",
 			"value": ""
 		}
 	]

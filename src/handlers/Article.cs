@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 
 public class ArticleHandlers
 {
@@ -5,6 +6,9 @@ public class ArticleHandlers
   {
     // POST /articles - Create a new article
     app.MapPost("/articles", ArticleHandlers.createArticle);
+
+    // PUT /articles/{slug} - Update an article
+    app.MapPut("/articles/{slug}", ArticleHandlers.updateArticle);
   }
 
   public static async Task<IResult> createArticle(HttpContext httpContext, Db db)
@@ -18,6 +22,29 @@ public class ArticleHandlers
 
     var article = Article.fromCreationDTO(articleCreationDTOEnvelope!.article, user!);
     db.Articles.Add(article);
+    await db.SaveChangesAsync();
+    return Results.Ok(ArticleDTOEnvelope.fromArticle(article));
+  }
+
+  public static async Task<IResult> updateArticle(HttpContext httpContext, Db db, string slug)
+  {
+    var (articleUpdateDTOEnvelope, errors) = Validation.Parse<ArticleUpdateDTOEnvelope>(await new StreamReader(httpContext.Request.Body).ReadToEndAsync());
+    if (errors.Count > 0)
+    {
+      return Results.UnprocessableEntity(new ErrorDTO { Errors = errors });
+    }
+    var (user, _) = Auth.getUserAndToken(httpContext);
+    // Get article by slug including author
+    var article = await db.Articles.Include(a => a.Author).FirstOrDefaultAsync(a => a.Slug == slug);
+    if (article == null)
+    {
+      return Results.NotFound();
+    }
+    if (article.Author.Id != user!.Id)
+    {
+      return Results.StatusCode(StatusCodes.Status403Forbidden);
+    }
+    article.UpdateFromDTO(articleUpdateDTOEnvelope!.article);
     await db.SaveChangesAsync();
     return Results.Ok(ArticleDTOEnvelope.fromArticle(article));
   }
