@@ -20,7 +20,6 @@ public class Db(DbContextOptions<Db> options) : DbContext(options)
     return await base.SaveChangesAsync(cancellationToken);
   }
 
-
   private void UpdateTimestamps()
   {
     var entries = ChangeTracker
@@ -34,5 +33,15 @@ public class Db(DbContextOptions<Db> options) : DbContext(options)
       if (entry.State == EntityState.Added)
         entry.Entity.CreatedAt = DateTime.UtcNow;
     }
+  }
+
+  protected override void OnModelCreating(ModelBuilder modelBuilder)
+  {
+    // Cascade delete ArticleTags when an Article is deleted
+    modelBuilder.Entity<Article>()
+      .HasMany(a => a.Tags)
+      .WithOne(t => t.Article)
+      .HasForeignKey(t => t.ArticleId)
+      .OnDelete(DeleteBehavior.Cascade);
   }
 }

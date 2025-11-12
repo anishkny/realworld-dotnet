@@ -7,5 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 [ExcludeFromCodeCoverage]
 public class ArticleTag : BaseEntity
 {
+  public Guid ArticleId { get; set; }
+  public Article Article { get; set; } = null!;
   public string Name { get; set; } = "";
 }

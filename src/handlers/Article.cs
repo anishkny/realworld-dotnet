@@ -9,6 +9,9 @@ public class ArticleHandlers
 
     // PUT /articles/{slug} - Update an article
     app.MapPut("/articles/{slug}", ArticleHandlers.updateArticle);
+
+    // DELETE /articles/{slug} - Delete an article
+    app.MapDelete("/articles/{slug}", ArticleHandlers.deleteArticle);
   }
 
   public static async Task<IResult> createArticle(HttpContext httpContext, Db db)
@@ -34,7 +37,7 @@ public class ArticleHandlers
       return Results.UnprocessableEntity(new ErrorDTO { Errors = errors });
     }
     var (user, _) = Auth.getUserAndToken(httpContext);
-    // Get article by slug including author
+
     var article = await db.Articles.Include(a => a.Author).FirstOrDefaultAsync(a => a.Slug == slug);
     if (article == null)
     {
@@ -47,6 +50,24 @@ public class ArticleHandlers
     article.UpdateFromDTO(articleUpdateDTOEnvelope!.article);
     await db.SaveChangesAsync();
     return Results.Ok(ArticleDTOEnvelope.fromArticle(article));
+  }
+
+  public static async Task<IResult> deleteArticle(HttpContext httpContext, Db db, string slug)
+  {
+    var (user, _) = Auth.getUserAndToken(httpContext);
+    var article = await db.Articles.Include(a => a.Author).FirstOrDefaultAsync(a => a.Slug == slug);
+    if (article == null)
+    {
+      return Results.NotFound();
+    }
+    if (article.Author.Id != user!.Id)
+    {
+      return Results.StatusCode(StatusCodes.Status403Forbidden);
+    }
+
+    db.Articles.Remove(article);
+    await db.SaveChangesAsync();
+    return Results.Ok();
   }
 }
 
