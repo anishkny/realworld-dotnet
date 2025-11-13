@@ -25,7 +25,7 @@ public class Article : BaseEntity
     };
   }
 
-  public void UpdateFromDTO(ArticleUpdateDTO dto)
+  public void UpdateFromDTO(ArticleUpdateDTO dto, Db db)
   {
     if (dto.title != null)
     {
@@ -34,6 +34,16 @@ public class Article : BaseEntity
     }
     if (dto.description != null) Description = dto.description;
     if (dto.body != null) Body = dto.body;
+    if (dto.tagList != null)
+    {
+      Tags.Clear();
+      dto.tagList.ForEach(tagName =>
+        {
+          var articleTag = new ArticleTag { Name = tagName, Article = this, ArticleId = Id };
+          // Explicitly set the state to Added to avoid EF Core tracking issues
+          db.Entry(articleTag).State = Microsoft.EntityFrameworkCore.EntityState.Added;
+        });
+    }
   }
 }
 
@@ -65,6 +75,7 @@ public class ArticleUpdateDTO
   public string? title { get; set; }
   public string? description { get; set; }
   public string? body { get; set; }
+  public List<string>? tagList { get; set; }
 }
 
 public class ArticleDTOEnvelope

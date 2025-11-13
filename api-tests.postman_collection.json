@@ -1253,7 +1253,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"article\": {\n        \"title\": \"{{articleTitle}}\",\n        \"description\": \"{{articleDescription}}\",\n        \"body\": \"{{articleBody}}\",\n        \"tagList\": [\"{{articleTag1}}\", \"{{articleTag2}}\", \"{{articleTag3}}\"]\n    }\n}",
+							"raw": "{\n  \"article\": {\n    \"title\": \"{{articleTitle}}\",\n    \"description\": \"{{articleDescription}}\",\n    \"body\": \"{{articleBody}}\",\n    \"tagList\": [\n      \"{{articleTag1}}\",\n      \"{{articleTag2}}\",\n      \"{{articleTag3}}\"\n    ]\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1399,7 +1399,89 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"article\": {\n        \"title\": \"{{articleTitle}}\",\n        \"description\": \"{{articleDescription}}\"\n    }\n}",
+							"raw": "{\n  \"article\": {\n    \"title\": \"{{articleTitle}}\",\n    \"description\": \"{{articleDescription}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{APIURL}}/articles/{{articleSlug}}",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"articles",
+								"{{articleSlug}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Article - Tags",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"articleTag1\", pm.variables.replaceIn(\"{{$randomLoremWord}}\"));",
+									"pm.collectionVariables.set(\"articleTag2\", pm.variables.replaceIn(\"{{$randomLoremWord}}\"));",
+									"pm.collectionVariables.set(\"articleTag3\", pm.variables.replaceIn(\"{{$randomLoremWord}}\"));",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Schema is valid', function () {",
+									"  pm.response.to.have.jsonSchema(schemas.article);",
+									"});",
+									"",
+									"pm.test(\"Data is correct\", function () {",
+									"  const expectedTagsSorted = [",
+									"    pm.collectionVariables.get(\"articleTag1\"),",
+									"    pm.collectionVariables.get(\"articleTag2\"),",
+									"    pm.collectionVariables.get(\"articleTag3\")",
+									"  ].sort();",
+									"  var jsonData = pm.response.json();",
+									"  pm.expect(jsonData.article.title).to.eql(pm.collectionVariables.get(\"articleTitle\"));",
+									"  pm.expect(jsonData.article.description).to.eql(pm.collectionVariables.get(\"articleDescription\"));",
+									"  pm.expect(jsonData.article.body).to.eql(pm.collectionVariables.get(\"articleBody\"));",
+									"  pm.expect(jsonData.article.tagList.sort()).to.eql(expectedTagsSorted);",
+									"",
+									"  // Capture article slug for future use",
+									"  pm.collectionVariables.set(\"articleSlug\", jsonData.article.slug);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"article\": {\n    \"tagList\": [\n      \"{{articleTag1}}\",\n      \"{{articleTag2}}\",\n      \"{{articleTag3}}\"\n    ]\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1949,10 +2031,6 @@
 			"value": ""
 		},
 		{
-			"key": "token",
-			"value": ""
-		},
-		{
 			"key": "bio",
 			"value": ""
 		},
@@ -2006,6 +2084,10 @@
 		},
 		{
 			"key": "celeb-token",
+			"value": ""
+		},
+		{
+			"key": "token",
 			"value": ""
 		}
 	]

@@ -38,7 +38,7 @@ public class ArticleHandlers
     }
     var (user, _) = Auth.getUserAndToken(httpContext);
 
-    var article = await db.Articles.Include(a => a.Author).FirstOrDefaultAsync(a => a.Slug == slug);
+    var article = await db.Articles.Include(a => a.Author).Include(a => a.Tags).FirstOrDefaultAsync(a => a.Slug == slug);
     if (article == null)
     {
       return Results.NotFound();
@@ -47,7 +47,7 @@ public class ArticleHandlers
     {
       return Results.StatusCode(StatusCodes.Status403Forbidden);
     }
-    article.UpdateFromDTO(articleUpdateDTOEnvelope!.article);
+    article.UpdateFromDTO(articleUpdateDTOEnvelope!.article, db);
     await db.SaveChangesAsync();
     return Results.Ok(ArticleDTOEnvelope.fromArticle(article));
   }
