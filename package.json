@@ -13,10 +13,15 @@
     "check-coverage": "node ./check-coverage.js"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.1.0",
     "@xmldom/xmldom": "^0.8.11",
+    "ajv": "^8.17.1",
+    "axios": "^1.13.2",
     "kill-port-process": "^3.2.1",
+    "mocha": "^11.7.5",
     "newman": "^6.2.1",
     "wait-port": "^1.1.0",
     "xpath": "^0.0.34"
-  }
+  },
+  "type": "module"
 }
