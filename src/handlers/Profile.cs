@@ -1,4 +1,3 @@
-
 public class ProfileHandlers
 {
   public static void MapMethods(IEndpointRouteBuilder app)
@@ -27,7 +26,11 @@ public class ProfileHandlers
     var (currentUser, _) = Auth.getUserAndToken(httpContext);
     if (currentUser != null)
     {
-      isFollowing = Follow.isFollowing(httpContext.RequestServices.GetService<Db>(), currentUser.Id, user.Id);
+      isFollowing = Follow.isFollowing(
+        httpContext.RequestServices.GetService<Db>(),
+        currentUser.Id,
+        user.Id
+      );
     }
     return Results.Ok(new ProfileDTOEnvelope(user, isFollowing));
   }

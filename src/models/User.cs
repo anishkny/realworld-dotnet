@@ -13,12 +13,13 @@ public class User : BaseEntity
   public string Bio { get; set; } = "";
   public string Image { get; set; } = "";
 
-  public static User fromRegistrationDTO(UserRegistrationDTO userDTO) => new User
-  {
-    Email = userDTO.email.ToLower().Trim(),
-    Username = userDTO.username.ToLower().Trim(),
-    PasswordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(userDTO.password),
-  };
+  public static User fromRegistrationDTO(UserRegistrationDTO userDTO) =>
+    new User
+    {
+      Email = userDTO.email.ToLower().Trim(),
+      Username = userDTO.username.ToLower().Trim(),
+      PasswordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(userDTO.password),
+    };
 
   public static User? getUserById(Db? db, Guid userId)
   {
@@ -29,7 +30,6 @@ public class User : BaseEntity
   {
     return db?.Users.SingleOrDefault(u => u.Username == username);
   }
-
 }
 
 [ExcludeFromCodeCoverage]
@@ -45,8 +45,10 @@ public record UserRegistrationDTO
   // Define inner DTO class for user registration
   [Required]
   public string email { get; set; } = null!;
+
   [Required]
   public string username { get; set; } = null!;
+
   [Required]
   public string password { get; set; } = null!;
 }
@@ -56,17 +58,18 @@ public record AuthenticatedUserDTOEnvelope
 {
   public AuthenticatedUserDTO user { get; set; } = null!;
 
-  public static AuthenticatedUserDTOEnvelope fromUser(User user, string token) => new AuthenticatedUserDTOEnvelope
-  {
-    user = new AuthenticatedUserDTO
+  public static AuthenticatedUserDTOEnvelope fromUser(User user, string token) =>
+    new AuthenticatedUserDTOEnvelope
     {
-      email = user.Email,
-      token = token,
-      username = user.Username,
-      bio = user.Bio,
-      image = user.Image,
-    }
-  };
+      user = new AuthenticatedUserDTO
+      {
+        email = user.Email,
+        token = token,
+        username = user.Username,
+        bio = user.Bio,
+        image = user.Image,
+      },
+    };
 }
 
 [ExcludeFromCodeCoverage]

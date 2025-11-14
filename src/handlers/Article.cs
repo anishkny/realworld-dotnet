@@ -16,7 +16,9 @@ public class ArticleHandlers
 
   public static async Task<IResult> createArticle(HttpContext httpContext, Db db)
   {
-    var (articleCreationDTOEnvelope, errors) = Validation.Parse<ArticleCreationDTOEnvelope>(await new StreamReader(httpContext.Request.Body).ReadToEndAsync());
+    var (articleCreationDTOEnvelope, errors) = Validation.Parse<ArticleCreationDTOEnvelope>(
+      await new StreamReader(httpContext.Request.Body).ReadToEndAsync()
+    );
     if (errors.Count > 0)
     {
       return Results.UnprocessableEntity(new ErrorDTO { Errors = errors });
@@ -31,14 +33,19 @@ public class ArticleHandlers
 
   public static async Task<IResult> updateArticle(HttpContext httpContext, Db db, string slug)
   {
-    var (articleUpdateDTOEnvelope, errors) = Validation.Parse<ArticleUpdateDTOEnvelope>(await new StreamReader(httpContext.Request.Body).ReadToEndAsync());
+    var (articleUpdateDTOEnvelope, errors) = Validation.Parse<ArticleUpdateDTOEnvelope>(
+      await new StreamReader(httpContext.Request.Body).ReadToEndAsync()
+    );
     if (errors.Count > 0)
     {
       return Results.UnprocessableEntity(new ErrorDTO { Errors = errors });
     }
     var (user, _) = Auth.getUserAndToken(httpContext);
 
-    var article = await db.Articles.Include(a => a.Author).Include(a => a.Tags).FirstOrDefaultAsync(a => a.Slug == slug);
+    var article = await db
+      .Articles.Include(a => a.Author)
+      .Include(a => a.Tags)
+      .FirstOrDefaultAsync(a => a.Slug == slug);
     if (article == null)
     {
       return Results.NotFound();
@@ -70,4 +77,3 @@ public class ArticleHandlers
     return Results.Ok();
   }
 }
-

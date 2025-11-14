@@ -1,6 +1,0 @@
-root=true
-
-[src/*.cs]
-[src/**/*.cs]
-indent_style = space
-indent_size = 2

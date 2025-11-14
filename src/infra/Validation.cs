@@ -4,7 +4,7 @@ public class Validation
 {
   public static Dictionary<Type, JsonSchema> _cache = [];
 
-  static public (T @object, IList<string> errors) Parse<T>(string json)
+  public static (T @object, IList<string> errors) Parse<T>(string json)
   {
     JsonSchema schema;
     if (_cache.ContainsKey(typeof(T)))

@@ -1,6 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 
 [Table("ArticleTags")]
 [Index(nameof(Name))]
