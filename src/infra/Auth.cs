@@ -82,7 +82,7 @@ public class Auth
     try
     {
       Guid userId = verifyToken(authorization);
-      user = User.getUserById(db, userId);
+      user = User.getById(db, userId);
     }
     catch (Exception)
     {

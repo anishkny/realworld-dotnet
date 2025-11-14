@@ -15,7 +15,7 @@ public class ProfileHandlers
   public static IResult getProfile(HttpContext httpContext, string username)
   {
     // Get the user from the database
-    var user = User.getUserByUsername(httpContext.RequestServices.GetService<Db>(), username);
+    var user = User.getByUsername(httpContext.RequestServices.GetService<Db>(), username);
     if (user == null)
     {
       return Results.NotFound();
@@ -38,7 +38,7 @@ public class ProfileHandlers
   public static IResult followUser(HttpContext httpContext, string username)
   {
     // Get the user from the database
-    var user = User.getUserByUsername(httpContext.RequestServices.GetService<Db>(), username);
+    var user = User.getByUsername(httpContext.RequestServices.GetService<Db>(), username);
     if (user == null)
     {
       return Results.NotFound();
@@ -57,7 +57,7 @@ public class ProfileHandlers
   public static IResult unfollowUser(HttpContext httpContext, string username)
   {
     // Get the user from the database
-    var user = User.getUserByUsername(httpContext.RequestServices.GetService<Db>(), username);
+    var user = User.getByUsername(httpContext.RequestServices.GetService<Db>(), username);
     if (user == null)
     {
       return Results.NotFound();
