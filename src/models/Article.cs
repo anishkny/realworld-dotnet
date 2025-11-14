@@ -95,8 +95,14 @@ public class ArticleDTOEnvelope
 {
   public ArticleDTO article { get; set; } = null!;
 
-  public static ArticleDTOEnvelope fromArticle(Article article) =>
-    new ArticleDTOEnvelope
+  public static ArticleDTOEnvelope fromArticle(Article article, User? viewer = null, Db? db = null)
+  {
+    bool isFollowing = false;
+    if (viewer != null)
+    {
+      isFollowing = Follow.isFollowing(db!, viewer.Id, article.Author.Id);
+    }
+    return new ArticleDTOEnvelope
     {
       article = new ArticleDTO
       {
@@ -112,9 +118,11 @@ public class ArticleDTOEnvelope
           username = article.Author.Username,
           bio = article.Author.Bio,
           image = article.Author.Image,
+          following = isFollowing,
         },
       },
     };
+  }
 }
 
 public class ArticleDTO
