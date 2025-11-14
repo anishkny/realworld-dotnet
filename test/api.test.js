@@ -2,6 +2,7 @@ import { describe, it, before, after } from "mocha";
 import { faker } from "@faker-js/faker";
 import { strict as assert } from "assert";
 import Ajv from "ajv";
+import addFormats from "ajv-formats";
 import axios from "axios";
 import fs from "fs";
 
@@ -12,6 +13,7 @@ axios.defaults.validateStatus = (status) => status < 500;
 axios.defaults.baseURL = BASE_URL;
 
 const ajv = new Ajv({ allErrors: true });
+addFormats(ajv);
 
 const context = {};
 
@@ -225,6 +227,61 @@ describe("Profile", () => {
       { headers: { Authorization: context.user.token } }
     );
     assert.equal(res.status, 404);
+  });
+
+  it("Unfollow", async () => {
+    const res = await axios.delete(
+      `/profiles/${context.celebUser.username}/follow`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 200);
+    assertSchema(res.data, getSchemas().profile);
+    assert.equal(res.data.profile.username, context.celebUser.username);
+    assert.equal(res.data.profile.following, false);
+  });
+
+  it("Unfollow again", async () => {
+    const res = await axios.delete(
+      `/profiles/${context.celebUser.username}/follow`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 200);
+    assertSchema(res.data, getSchemas().profile);
+    assert.equal(res.data.profile.username, context.celebUser.username);
+    assert.equal(res.data.profile.following, false);
+  });
+
+  it("Unfollow unknown", async () => {
+    const res = await axios.delete(
+      `/profiles/${faker.internet.username()}/follow`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 404);
+  });
+});
+
+describe("Articles", () => {
+  it("Create article", async () => {
+    if (!context.article) {
+      context.article = {
+        title: "Test Article " + faker.lorem.sentence(),
+        description: faker.lorem.sentences(2),
+        body: faker.lorem.paragraphs(3),
+        tagList: [faker.lorem.word(), faker.lorem.word(), faker.lorem.word()],
+      };
+    }
+    const res = await axios.post(
+      "/articles",
+      { article: context.article },
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 200);
+    assertSchema(res.data, getSchemas().article);
+    assert.equal(res.data.article.title, context.article.title);
+    assert.equal(res.data.article.description, context.article.description);
+    assert.equal(res.data.article.body, context.article.body);
+    assert.deepEqual(res.data.article.tagList, context.article.tagList);
+    context.article = res.data.article;
   });
 });
 
