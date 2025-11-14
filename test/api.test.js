@@ -440,6 +440,64 @@ describe("Articles", () => {
     });
     assert.equal(res.status, 200);
   });
+
+  it("Get article - Followed user", async () => {
+    // Create new article by celeb user
+    const newArticle = {
+      title: "Celeb Article " + faker.lorem.sentence(),
+      description: faker.lorem.sentences(2),
+      body: faker.lorem.paragraphs(3),
+      tagList: [faker.lorem.word(), faker.lorem.word()],
+    };
+    const res = await axios.post(
+      "/articles",
+      { article: newArticle },
+      { headers: { Authorization: context.celebUser.token } }
+    );
+    assert.equal(res.status, 200);
+    const celebArticle = res.data.article;
+    context.celebArticle = celebArticle;
+
+    // User unfollows celeb
+    const res2 = await axios.delete(
+      `/profiles/${context.celebUser.username}/follow`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res2.status, 200);
+
+    // Get article and verify following is false
+    const res3 = await axios.get(`/articles/${celebArticle.slug}`, {
+      headers: { Authorization: context.user.token },
+    });
+    assert.equal(res3.status, 200);
+    assertSchema(res3.data, getSchemas().article);
+    assert.equal(res3.data.article.author.username, context.celebUser.username);
+    assert.equal(res3.data.article.author.following, false);
+
+    // User follows celeb
+    const res4 = await axios.post(
+      `/profiles/${context.celebUser.username}/follow`,
+      {},
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res4.status, 200);
+
+    // Get article and verify following is true
+    const res5 = await axios.get(`/articles/${celebArticle.slug}`, {
+      headers: { Authorization: context.user.token },
+    });
+    assert.equal(res5.status, 200);
+    assertSchema(res5.data, getSchemas().article);
+    assert.equal(res5.data.article.author.username, context.celebUser.username);
+    assert.equal(res5.data.article.author.following, true);
+
+    // Unfollow celeb to clean up
+    const res6 = await axios.delete(
+      `/profiles/${context.celebUser.username}/follow`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res6.status, 200);
+  });
 });
 
 // ----------------------------------------

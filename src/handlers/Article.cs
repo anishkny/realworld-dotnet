@@ -82,6 +82,7 @@ public class ArticleHandlers
 
   public static async Task<IResult> getArticle(HttpContext httpContext, Db db, string slug)
   {
+    var (user, _) = Auth.getUserAndToken(httpContext);
     var article = await db
       .Articles.Include(a => a.Author)
       .Include(a => a.Tags)
@@ -90,6 +91,6 @@ public class ArticleHandlers
     {
       return Results.NotFound();
     }
-    return Results.Ok(ArticleDTOEnvelope.fromArticle(article));
+    return Results.Ok(ArticleDTOEnvelope.fromArticle(article, user, db));
   }
 }
