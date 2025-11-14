@@ -4,6 +4,9 @@ public class ArticleHandlers
 {
   public static void MapMethods(IEndpointRouteBuilder app)
   {
+    // GET /articles/{slug} - Get a single article
+    app.MapGet("/articles/{slug}", ArticleHandlers.getArticle);
+
     // POST /articles - Create a new article
     app.MapPost("/articles", ArticleHandlers.createArticle);
 
@@ -12,6 +15,18 @@ public class ArticleHandlers
 
     // DELETE /articles/{slug} - Delete an article
     app.MapDelete("/articles/{slug}", ArticleHandlers.deleteArticle);
+  }
+
+  public static async Task<IResult> getArticle(HttpContext httpContext, Db db, string slug)
+  {
+    var (user, _) = Auth.getUserAndToken(httpContext);
+
+    var article = await db.Articles.Include(a => a.Author).Include(a => a.Tags).FirstOrDefaultAsync(a => a.Slug == slug);
+    if (article == null)
+    {
+      return Results.NotFound();
+    }
+    return Results.Ok(ArticleDTOEnvelope.fromArticle(article, db, user));
   }
 
   public static async Task<IResult> createArticle(HttpContext httpContext, Db db)
@@ -26,7 +41,7 @@ public class ArticleHandlers
     var article = Article.fromCreationDTO(articleCreationDTOEnvelope!.article, user!);
     db.Articles.Add(article);
     await db.SaveChangesAsync();
-    return Results.Ok(ArticleDTOEnvelope.fromArticle(article));
+    return Results.Ok(ArticleDTOEnvelope.fromArticle(article, db, user));
   }
 
   public static async Task<IResult> updateArticle(HttpContext httpContext, Db db, string slug)
@@ -49,7 +64,7 @@ public class ArticleHandlers
     }
     article.UpdateFromDTO(articleUpdateDTOEnvelope!.article, db);
     await db.SaveChangesAsync();
-    return Results.Ok(ArticleDTOEnvelope.fromArticle(article));
+    return Results.Ok(ArticleDTOEnvelope.fromArticle(article, db, user));
   }
 
   public static async Task<IResult> deleteArticle(HttpContext httpContext, Db db, string slug)

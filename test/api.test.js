@@ -422,6 +422,57 @@ describe("Articles", () => {
     });
     assert.equal(res.status, 200);
   });
+
+  it("View celeb article after following them - should have following true", async () => {
+    // First, unfollow celeb if already following (from previous tests)
+    await axios.delete(
+      `/profiles/${context.celebUser.username}/follow`,
+      { headers: { Authorization: context.user.token } }
+    );
+
+    // Create article by celeb user
+    const celebArticle = {
+      title: "Celeb Article " + faker.lorem.sentence(),
+      description: faker.lorem.sentences(2),
+      body: faker.lorem.paragraphs(3),
+      tagList: [faker.lorem.word()],
+    };
+    const createRes = await axios.post(
+      "/articles",
+      { article: celebArticle },
+      { headers: { Authorization: context.celebUser.token } }
+    );
+    assert.equal(createRes.status, 200);
+    assert.equal(createRes.data.article.author.following, false);
+    context.celebArticle = createRes.data.article;
+
+    // View article before following - should show following false
+    const viewBeforeRes = await axios.get(
+      `/articles/${context.celebArticle.slug}`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(viewBeforeRes.status, 200);
+    assertSchema(viewBeforeRes.data, getSchemas().article);
+    assert.equal(viewBeforeRes.data.article.author.following, false);
+
+    // Follow the celeb user
+    const followRes = await axios.post(
+      `/profiles/${context.celebUser.username}/follow`,
+      {},
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(followRes.status, 200);
+    assert.equal(followRes.data.profile.following, true);
+
+    // View article after following - should show following true
+    const viewAfterRes = await axios.get(
+      `/articles/${context.celebArticle.slug}`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(viewAfterRes.status, 200);
+    assertSchema(viewAfterRes.data, getSchemas().article);
+    assert.equal(viewAfterRes.data.article.author.following, true);
+  });
 });
 
 // ----------------------------------------
