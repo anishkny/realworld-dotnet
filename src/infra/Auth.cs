@@ -14,6 +14,7 @@ public class Auth
       ("POST", "/api/users") => true,
       ("POST", "/api/users/login") => true,
       ("GET", var p) when p.StartsWith("/api/profiles/") => true,
+      ("GET", var p) when p.StartsWith("/api/articles/") => true,
       _ => false,
     };
 

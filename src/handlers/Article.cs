@@ -12,6 +12,9 @@ public class ArticleHandlers
 
     // DELETE /articles/{slug} - Delete an article
     app.MapDelete("/articles/{slug}", ArticleHandlers.deleteArticle);
+
+    // GET /articles/{slug} - Get an article
+    app.MapGet("/articles/{slug}", ArticleHandlers.getArticle);
   }
 
   public static async Task<IResult> createArticle(HttpContext httpContext, Db db)
@@ -75,5 +78,18 @@ public class ArticleHandlers
     db.Articles.Remove(article);
     await db.SaveChangesAsync();
     return Results.Ok();
+  }
+
+  public static async Task<IResult> getArticle(HttpContext httpContext, Db db, string slug)
+  {
+    var article = await db
+      .Articles.Include(a => a.Author)
+      .Include(a => a.Tags)
+      .FirstOrDefaultAsync(a => a.Slug == slug);
+    if (article == null)
+    {
+      return Results.NotFound();
+    }
+    return Results.Ok(ArticleDTOEnvelope.fromArticle(article));
   }
 }

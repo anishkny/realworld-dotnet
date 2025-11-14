@@ -299,6 +299,26 @@ describe("Articles", () => {
     context.article = res.data.article;
   });
 
+  it("Get article", async () => {
+    const res = await axios.get(`/articles/${context.article.slug}`);
+    assert.equal(res.status, 200);
+    assertSchema(res.data, getSchemas().article);
+    assert.equal(res.data.article.title, context.article.title);
+    assert.equal(res.data.article.description, context.article.description);
+    assert.equal(res.data.article.body, context.article.body);
+    assert.deepEqual(
+      res.data.article.tagList.sort(),
+      context.article.tagList.sort()
+    );
+  });
+
+  it("Get article - Unknown slug", async () => {
+    const res = await axios.get(
+      `/articles/unknown-slug-${faker.string.uuid()}`
+    );
+    assert.equal(res.status, 404);
+  });
+
   it("Create article - Bad request", async () => {
     const res = await axios.post(
       "/articles",
