@@ -31,7 +31,7 @@ public class ArticleHandlers
     var article = Article.fromCreationDTO(articleCreationDTOEnvelope!.article, user!);
     db.Articles.Add(article);
     await db.SaveChangesAsync();
-    return Results.Ok(ArticleDTOEnvelope.fromArticle(article));
+    return Results.Ok(ArticleDTOEnvelope.fromArticle(db, article));
   }
 
   public static async Task<IResult> updateArticle(HttpContext httpContext, Db db, string slug)
@@ -57,9 +57,9 @@ public class ArticleHandlers
     {
       return Results.StatusCode(StatusCodes.Status403Forbidden);
     }
-    article.UpdateFromDTO(articleUpdateDTOEnvelope!.article, db);
+    article.updateFromDTO(articleUpdateDTOEnvelope!.article, db);
     await db.SaveChangesAsync();
-    return Results.Ok(ArticleDTOEnvelope.fromArticle(article));
+    return Results.Ok(ArticleDTOEnvelope.fromArticle(db, article));
   }
 
   public static async Task<IResult> deleteArticle(HttpContext httpContext, Db db, string slug)
@@ -82,15 +82,12 @@ public class ArticleHandlers
 
   public static async Task<IResult> getArticle(HttpContext httpContext, Db db, string slug)
   {
-    var (user, _) = Auth.getUserAndToken(httpContext);
-    var article = await db
-      .Articles.Include(a => a.Author)
-      .Include(a => a.Tags)
-      .FirstOrDefaultAsync(a => a.Slug == slug);
+    var article = await Article.getBySlug(db, slug);
     if (article == null)
     {
       return Results.NotFound();
     }
-    return Results.Ok(ArticleDTOEnvelope.fromArticle(article, user, db));
+    var (user, _) = Auth.getUserAndToken(httpContext);
+    return Results.Ok(ArticleDTOEnvelope.fromArticle(db, article, user));
   }
 }

@@ -21,12 +21,12 @@ public class User : BaseEntity
       PasswordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(userDTO.password),
     };
 
-  public static User? getUserById(Db? db, Guid userId)
+  public static User? getById(Db? db, Guid userId)
   {
     return db?.Users.SingleOrDefault(u => u.Id == userId);
   }
 
-  public static User? getUserByUsername(Db? db, string username)
+  public static User? getByUsername(Db? db, string username)
   {
     return db?.Users.SingleOrDefault(u => u.Username == username);
   }

@@ -7,5 +7,6 @@ public class RouteMapper
     UserHandlers.MapMethods(apiGroup);
     ProfileHandlers.MapMethods(apiGroup);
     ArticleHandlers.MapMethods(apiGroup);
+    FavoriteHandlers.MapMethods(apiGroup);
   }
 }

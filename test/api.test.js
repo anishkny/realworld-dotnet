@@ -500,6 +500,121 @@ describe("Articles", () => {
   });
 });
 
+describe("Favorites", () => {
+  it("Favorite article", async () => {
+    // Create celeb article
+    const newArticle = {
+      title: "Celeb Article " + faker.lorem.sentence(),
+      description: faker.lorem.sentences(2),
+      body: faker.lorem.paragraphs(3),
+      tagList: [faker.lorem.word(), faker.lorem.word()],
+    };
+    const resCreate = await axios.post(
+      "/articles",
+      { article: newArticle },
+      { headers: { Authorization: context.celebUser.token } }
+    );
+    assert.equal(resCreate.status, 200);
+    context.celebArticle = resCreate.data.article;
+
+    // Favorite celeb article
+    const res2 = await axios.post(
+      `/articles/${context.celebArticle.slug}/favorite`,
+      {},
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res2.status, 200);
+
+    // Verify article is favorited
+    const res3 = await axios.get(`/articles/${context.celebArticle.slug}`, {
+      headers: { Authorization: context.user.token },
+    });
+    assert.equal(res3.status, 200);
+    assertSchema(res3.data, getSchemas().article);
+    assert.equal(res3.data.article.favorited, true);
+    assert.equal(res3.data.article.favoritesCount, 1);
+
+    // Verify favoritesCount as unauthenticated user
+    const res4 = await axios.get(`/articles/${context.celebArticle.slug}`);
+    assert.equal(res4.status, 200);
+    assertSchema(res4.data, getSchemas().article);
+    assert.equal(res4.data.article.favorited, false);
+    assert.equal(res4.data.article.favoritesCount, 1);
+  });
+
+  it("Favorite - Again", async () => {
+    // Favorite celeb article again
+    const res = await axios.post(
+      `/articles/${context.celebArticle.slug}/favorite`,
+      {},
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 200);
+
+    // Verify article is still favorited only once
+    const res2 = await axios.get(`/articles/${context.celebArticle.slug}`, {
+      headers: { Authorization: context.user.token },
+    });
+    assert.equal(res2.status, 200);
+    assertSchema(res2.data, getSchemas().article);
+    assert.equal(res2.data.article.favorited, true);
+    assert.equal(res2.data.article.favoritesCount, 1);
+  });
+
+  it("Unfavorite article", async () => {
+    // Unfavorite celeb article
+    const res = await axios.delete(
+      `/articles/${context.celebArticle.slug}/favorite`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 200);
+
+    // Verify article is unfavorited
+    const res2 = await axios.get(`/articles/${context.celebArticle.slug}`, {
+      headers: { Authorization: context.user.token },
+    });
+    assert.equal(res2.status, 200);
+    assertSchema(res2.data, getSchemas().article);
+    assert.equal(res2.data.article.favorited, false);
+    assert.equal(res2.data.article.favoritesCount, 0);
+  });
+
+  it("Unfavorite - Again", async () => {
+    // Unfavorite celeb article again
+    const res = await axios.delete(
+      `/articles/${context.celebArticle.slug}/favorite`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 200);
+
+    // Verify article is still unfavorited
+    const res2 = await axios.get(`/articles/${context.celebArticle.slug}`, {
+      headers: { Authorization: context.user.token },
+    });
+    assert.equal(res2.status, 200);
+    assertSchema(res2.data, getSchemas().article);
+    assert.equal(res2.data.article.favorited, false);
+    assert.equal(res2.data.article.favoritesCount, 0);
+  });
+
+  it("Favorite - Unknown article", async () => {
+    const res = await axios.post(
+      `/articles/unknown-slug-${faker.string.uuid()}/favorite`,
+      {},
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 404);
+  });
+
+  it("Unfavorite - Unknown article", async () => {
+    const res = await axios.delete(
+      `/articles/unknown-slug-${faker.string.uuid()}/favorite`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 404);
+  });
+});
+
 // ----------------------------------------
 // HELPERS
 // ----------------------------------------

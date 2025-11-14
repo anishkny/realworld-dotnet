@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 using Slugify;
 
 [ExcludeFromCodeCoverage]
@@ -27,7 +28,17 @@ public class Article : BaseEntity
     };
   }
 
-  public void UpdateFromDTO(ArticleUpdateDTO dto, Db db)
+  public static async Task<Article?> getBySlug(Db? db, string slug)
+  {
+    if (db == null)
+      return null;
+    return await db
+      .Articles.Include(a => a.Author)
+      .Include(a => a.Tags)
+      .FirstOrDefaultAsync(a => a.Slug == slug);
+  }
+
+  public void updateFromDTO(ArticleUpdateDTO dto, Db db)
   {
     if (dto.title != null)
     {
@@ -52,7 +63,7 @@ public class Article : BaseEntity
           ArticleId = Id,
         };
         // Explicitly set the state to Added to avoid EF Core tracking issues
-        db.Entry(articleTag).State = Microsoft.EntityFrameworkCore.EntityState.Added;
+        db.Entry(articleTag).State = EntityState.Added;
       });
     }
   }
@@ -95,13 +106,17 @@ public class ArticleDTOEnvelope
 {
   public ArticleDTO article { get; set; } = null!;
 
-  public static ArticleDTOEnvelope fromArticle(Article article, User? viewer = null, Db? db = null)
+  public static ArticleDTOEnvelope fromArticle(Db db, Article article, User? viewer = null)
   {
     bool isFollowing = false;
+    bool isFavorited = false;
     if (viewer != null)
     {
-      isFollowing = Follow.isFollowing(db!, viewer.Id, article.Author.Id);
+      isFollowing = Follow.isFollowing(db, viewer.Id, article.Author.Id);
+      isFavorited = Favorite.isFavorited(db, viewer.Id, article.Id);
     }
+    var favoritesCount = db.Favorites.Count(f => f.Article.Id == article.Id);
+
     return new ArticleDTOEnvelope
     {
       article = new ArticleDTO
@@ -113,6 +128,8 @@ public class ArticleDTOEnvelope
         tagList = article.Tags.Select(t => t.Name).ToList(),
         createdAt = article.CreatedAt.ToString("o"),
         updatedAt = article.UpdatedAt.ToString("o"),
+        favorited = isFavorited,
+        favoritesCount = favoritesCount,
         author = new ArticleAuthor
         {
           username = article.Author.Username,
