@@ -179,22 +179,20 @@ describe("User", () => {
 describe("Profile", () => {
   it("Get profile", async () => {
     // Register celeb user
-    if (!context.celebUser) {
-      const celebUserData = generateTestUserData("celeb_");
-      const res = await axios.post("/users", {
-        user: celebUserData,
-      });
-      assert.equal(res.status, 200);
-      context.celebUser = res.data.user;
-    }
-
-    const res = await axios.get(`/profiles/${context.celebUser.username}`);
+    const celebUserData = generateTestUserData("celeb_");
+    const res = await axios.post("/users", {
+      user: celebUserData,
+    });
     assert.equal(res.status, 200);
-    assertSchema(res.data, getSchemas().profile);
-    assert.equal(res.data.profile.username, context.celebUser.username);
-    assert.equal(res.data.profile.bio, "");
-    assert.equal(res.data.profile.image, "");
-    assert.equal(res.data.profile.following, false);
+    context.celebUser = res.data.user;
+
+    const res2 = await axios.get(`/profiles/${context.celebUser.username}`);
+    assert.equal(res2.status, 200);
+    assertSchema(res2.data, getSchemas().profile);
+    assert.equal(res2.data.profile.username, context.celebUser.username);
+    assert.equal(res2.data.profile.bio, "");
+    assert.equal(res2.data.profile.image, "");
+    assert.equal(res2.data.profile.following, false);
   });
 
   it("Get profile - Unknown", async () => {

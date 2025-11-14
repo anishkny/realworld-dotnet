@@ -1,4 +1,3 @@
-
 public class RouteMapper
 {
   public static void MapMethods(WebApplication app)

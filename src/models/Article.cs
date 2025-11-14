@@ -16,12 +16,14 @@ public class Article : BaseEntity
   {
     return new Article
     {
-      Slug = new SlugHelper().GenerateSlug(article.title + "-" + Guid.NewGuid().ToString().Substring(0, 8)),
+      Slug = new SlugHelper().GenerateSlug(
+        article.title + "-" + Guid.NewGuid().ToString().Substring(0, 8)
+      ),
       Title = article.title,
       Description = article.description,
       Body = article.body,
       Author = user,
-      Tags = article.tagList.Select(tag => new ArticleTag { Name = tag }).ToList()
+      Tags = article.tagList.Select(tag => new ArticleTag { Name = tag }).ToList(),
     };
   }
 
@@ -30,19 +32,28 @@ public class Article : BaseEntity
     if (dto.title != null)
     {
       Title = dto.title;
-      Slug = new SlugHelper().GenerateSlug(dto.title + "-" + Guid.NewGuid().ToString().Substring(0, 8));
+      Slug = new SlugHelper().GenerateSlug(
+        dto.title + "-" + Guid.NewGuid().ToString().Substring(0, 8)
+      );
     }
-    if (dto.description != null) Description = dto.description;
-    if (dto.body != null) Body = dto.body;
+    if (dto.description != null)
+      Description = dto.description;
+    if (dto.body != null)
+      Body = dto.body;
     if (dto.tagList != null)
     {
       Tags.Clear();
       dto.tagList.ForEach(tagName =>
+      {
+        var articleTag = new ArticleTag
         {
-          var articleTag = new ArticleTag { Name = tagName, Article = this, ArticleId = Id };
-          // Explicitly set the state to Added to avoid EF Core tracking issues
-          db.Entry(articleTag).State = Microsoft.EntityFrameworkCore.EntityState.Added;
-        });
+          Name = tagName,
+          Article = this,
+          ArticleId = Id,
+        };
+        // Explicitly set the state to Added to avoid EF Core tracking issues
+        db.Entry(articleTag).State = Microsoft.EntityFrameworkCore.EntityState.Added;
+      });
     }
   }
 }
@@ -57,8 +68,10 @@ public class ArticleCreationDTO
 {
   [Required]
   public string title { get; set; } = "";
+
   [Required]
   public string description { get; set; } = "";
+
   [Required]
   public string body { get; set; } = "";
   public List<string> tagList { get; set; } = new List<string>();
@@ -82,25 +95,26 @@ public class ArticleDTOEnvelope
 {
   public ArticleDTO article { get; set; } = null!;
 
-  public static ArticleDTOEnvelope fromArticle(Article article) => new ArticleDTOEnvelope
-  {
-    article = new ArticleDTO
+  public static ArticleDTOEnvelope fromArticle(Article article) =>
+    new ArticleDTOEnvelope
     {
-      slug = article.Slug,
-      title = article.Title,
-      description = article.Description,
-      body = article.Body,
-      tagList = article.Tags.Select(t => t.Name).ToList(),
-      createdAt = article.CreatedAt.ToString("o"),
-      updatedAt = article.UpdatedAt.ToString("o"),
-      author = new ArticleAuthor
+      article = new ArticleDTO
       {
-        username = article.Author.Username,
-        bio = article.Author.Bio,
-        image = article.Author.Image,
-      }
-    }
-  };
+        slug = article.Slug,
+        title = article.Title,
+        description = article.Description,
+        body = article.Body,
+        tagList = article.Tags.Select(t => t.Name).ToList(),
+        createdAt = article.CreatedAt.ToString("o"),
+        updatedAt = article.UpdatedAt.ToString("o"),
+        author = new ArticleAuthor
+        {
+          username = article.Author.Username,
+          bio = article.Author.Bio,
+          image = article.Author.Image,
+        },
+      },
+    };
 }
 
 public class ArticleDTO

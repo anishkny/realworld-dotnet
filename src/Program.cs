@@ -2,7 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 string PORT = Environment.GetEnvironmentVariable("PORT") ?? "3000";
-string POSTGRES_CONNECTION_STRING = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
+string POSTGRES_CONNECTION_STRING =
+  Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
   ?? "Host=localhost;Port=5432;Username=postgres;Password=password;";
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,9 @@ app.Use(Auth.AuthenticateRequest);
 RouteMapper.MapMethods(app);
 
 // TODO: Remove this in favor of proper migrations
-using (var scope = app.Services.CreateScope()) { scope.ServiceProvider.GetRequiredService<Db>().Database.EnsureCreated(); }
+using (var scope = app.Services.CreateScope())
+{
+  scope.ServiceProvider.GetRequiredService<Db>().Database.EnsureCreated();
+}
 
 app.Run($"http://localhost:{PORT}");

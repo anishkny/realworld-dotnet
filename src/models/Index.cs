@@ -38,7 +38,8 @@ public class Db(DbContextOptions<Db> options) : DbContext(options)
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     // Cascade delete ArticleTags when an Article is deleted
-    modelBuilder.Entity<Article>()
+    modelBuilder
+      .Entity<Article>()
       .HasMany(a => a.Tags)
       .WithOne(t => t.Article)
       .HasForeignKey(t => t.ArticleId)
