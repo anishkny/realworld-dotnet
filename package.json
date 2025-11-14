@@ -2,8 +2,8 @@
   "scripts": {
     "format:fix": "dotnet csharpier format src",
     "format:check": "dotnet csharpier check src",
-    "build": "npm run format:check && dotnet build",
-    "prestart:only": "rm -rf coverage* && dotnet tool restore",
+    "build": "dotnet tool restore && npm run format:check && dotnet build",
+    "prestart:only": "rm -rf coverage*",
     "start:only": "dotnet tool run dotnet-coverage collect -o coverage.xml -f cobertura -if 'bin/Debug/net8.0/realworld-dotnet.dll' -- dotnet run --no-build",
     "start": "npm run build && npm run start:only",
     "test:only": "mocha --bail",
