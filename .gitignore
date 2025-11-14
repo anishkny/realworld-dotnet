@@ -1,6 +1,7 @@
 .DS_Store
 *.sln
 bin/
+context.json
 coverage.xml
 coveragereport/
 node_modules/
