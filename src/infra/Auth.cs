@@ -10,7 +10,7 @@ public class Auth
   // Method to check if the endpoint is public
   static bool isPublicEndpoint(string method, string path) => (method.ToUpper(), path.ToLower()) switch
   {
-    ("GET", "/") => true,
+    ("GET", "/api") => true,
     ("POST", "/api/users") => true,
     ("POST", "/api/users/login") => true,
     ("GET", var p) when p.StartsWith("/api/profiles/") => true,

@@ -32,6 +32,13 @@ after(() => {
   fs.writeFileSync(CONTEXT_FILE, JSON.stringify(context, null, 2));
 });
 
+describe("Health", () => {
+  it("Root", async () => {
+    const res = await axios.get("");
+    assert.equal(res.status, 200);
+  });
+});
+
 describe("Auth", () => {
   it("Register", async () => {
     context.user = generateTestUserData();
@@ -45,12 +52,20 @@ describe("Auth", () => {
 
   it("Register - Bad request", async () => {
     const res = await axios.post("/users", {
-      user: { email: context.user.email, password: context.user.password },
+      user: { email: context.user.email },
     });
     assert.equal(res.status, 422);
     assert.deepEqual(res.data, {
-      errors: ["#/user.username: PropertyRequired"],
+      errors: [
+        "#/user.username: PropertyRequired",
+        "#/user.password: PropertyRequired",
+      ],
     });
+
+    // Empty request
+    const res2 = await axios.post("/users", null);
+    assert.equal(res2.status, 422);
+    assert.deepEqual(res2.data, { errors: ["Error parsing JSON"] });
   });
 
   it("Register - Empty request", async () => {
@@ -118,11 +133,12 @@ describe("User", () => {
   });
 
   it("Update user", async () => {
+    const newEmail = "updated_" + context.user.email;
     const newBio = faker.lorem.sentence();
     const newImage = faker.image.avatar();
     const res = await axios.put(
       "/user",
-      { user: { bio: newBio, image: newImage } },
+      { user: { email: newEmail, bio: newBio, image: newImage } },
       { headers: { Authorization: context.user.token } }
     );
     assert.equal(res.status, 200);
@@ -262,14 +278,12 @@ describe("Profile", () => {
 
 describe("Articles", () => {
   it("Create article", async () => {
-    if (!context.article) {
-      context.article = {
-        title: "Test Article " + faker.lorem.sentence(),
-        description: faker.lorem.sentences(2),
-        body: faker.lorem.paragraphs(3),
-        tagList: [faker.lorem.word(), faker.lorem.word(), faker.lorem.word()],
-      };
-    }
+    context.article = {
+      title: "Test Article " + faker.lorem.sentence(),
+      description: faker.lorem.sentences(2),
+      body: faker.lorem.paragraphs(3),
+      tagList: [faker.lorem.word(), faker.lorem.word(), faker.lorem.word()],
+    };
     const res = await axios.post(
       "/articles",
       { article: context.article },
@@ -280,8 +294,133 @@ describe("Articles", () => {
     assert.equal(res.data.article.title, context.article.title);
     assert.equal(res.data.article.description, context.article.description);
     assert.equal(res.data.article.body, context.article.body);
-    assert.deepEqual(res.data.article.tagList, context.article.tagList);
+    assert.deepEqual(
+      res.data.article.tagList.sort(),
+      context.article.tagList.sort()
+    );
     context.article = res.data.article;
+  });
+
+  it("Create article - Bad request", async () => {
+    const res = await axios.post(
+      "/articles",
+      { xarticle: { title: "Invalid" } },
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 422);
+    assert.deepEqual(res.data, {
+      errors: [
+        "#/article: PropertyRequired",
+        "#/xarticle: NoAdditionalPropertiesAllowed",
+      ],
+    });
+  });
+
+  it("Update article", async () => {
+    const newTitle = "Updated Title " + faker.lorem.sentence();
+    const newDescription = "Updated Description " + faker.lorem.sentences(2);
+    const newBody = "Updated Body " + faker.lorem.paragraphs(3);
+    const res = await axios.put(
+      `/articles/${context.article.slug}`,
+      {
+        article: {
+          title: newTitle,
+          description: newDescription,
+          body: newBody,
+        },
+      },
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 200);
+    assertSchema(res.data, getSchemas().article);
+    assert.equal(res.data.article.title, newTitle);
+    assert.equal(res.data.article.description, newDescription);
+    assert.equal(res.data.article.body, newBody);
+    assert.notEqual(res.data.article.slug, context.article.slug);
+    assert(
+      new Date(res.data.article.updatedAt) >
+        new Date(res.data.article.createdAt)
+    );
+    context.article = res.data.article;
+  });
+
+  it("Update article - Tags", async () => {
+    const newTagList = [
+      "new-tag-" + faker.lorem.word(),
+      "new-tag-" + faker.lorem.word(),
+    ];
+    const res = await axios.put(
+      `/articles/${context.article.slug}`,
+      {
+        article: {
+          tagList: newTagList,
+        },
+      },
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 200);
+    assertSchema(res.data, getSchemas().article);
+    assert.deepEqual(res.data.article.tagList.sort(), newTagList.sort());
+    context.article = res.data.article;
+  });
+
+  it("Update article - Bad request", async () => {
+    const res = await axios.put(
+      `/articles/${context.article.slug}`,
+      { xarticle: { title: "Invalid" } },
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 422);
+    assert.deepEqual(res.data, {
+      errors: [
+        "#/article: PropertyRequired",
+        "#/xarticle: NoAdditionalPropertiesAllowed",
+      ],
+    });
+  });
+
+  it("Update article - Unknown slug", async () => {
+    const res = await axios.put(
+      `/articles/unknown-slug-${faker.string.uuid()}`,
+      {
+        article: {
+          title: "New Title",
+        },
+      },
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 404);
+  });
+
+  it("Update article - Forbidden", async () => {
+    const res = await axios.put(
+      `/articles/${context.article.slug}`,
+      { article: { title: "Hacked Title" } },
+      { headers: { Authorization: context.celebUser.token } }
+    );
+    assert.equal(res.status, 403);
+  });
+
+  it("Delete article - Unknown slug", async () => {
+    const res = await axios.delete(
+      `/articles/unknown-slug-${faker.string.uuid()}`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 404);
+  });
+
+  it("Delete article - Forbidden", async () => {
+    const res = await axios.delete(`/articles/${context.article.slug}`, {
+      headers: { Authorization: context.celebUser.token },
+    });
+    assert.equal(res.status, 403);
+  });
+
+  it("Delete article", async () => {
+    const res = await axios.delete(`/articles/${context.article.slug}`, {
+      headers: { Authorization: context.user.token },
+    });
+    assert.equal(res.status, 200);
   });
 });
 
