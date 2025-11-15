@@ -615,6 +615,54 @@ describe("Favorites", () => {
   });
 });
 
+describe("Comments", () => {
+  it("Add comment to article", async () => {
+    const commentBody = faker.lorem.sentence();
+    const res = await axios.post(
+      `/articles/${context.celebArticle.slug}/comments`,
+      { comment: { body: commentBody } },
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 200);
+    assertSchema(res.data, getSchemas().comment);
+    assert.equal(res.data.comment.body, commentBody);
+    assert.equal(res.data.comment.author.username, context.user.username);
+    context.comment = res.data.comment;
+  });
+
+  it("Add comment - Bad request", async () => {
+    const res = await axios.post(
+      `/articles/${context.celebArticle.slug}/comments`,
+      { xcomment: { body: "Invalid" } },
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 422);
+    assert.deepEqual(res.data, {
+      errors: [
+        "#/comment: PropertyRequired",
+        "#/xcomment: NoAdditionalPropertiesAllowed",
+      ],
+    });
+  });
+
+  it("Add comment - Unknown article", async () => {
+    const res = await axios.post(
+      `/articles/unknown-slug-${faker.string.uuid()}/comments`,
+      { comment: { body: faker.lorem.sentence() } },
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 404);
+  });
+
+  it("Add comment - Unauthorized", async () => {
+    const res = await axios.post(
+      `/articles/${context.celebArticle.slug}/comments`,
+      { comment: { body: faker.lorem.sentence() } }
+    );
+    assert.equal(res.status, 401);
+  });
+});
+
 // ----------------------------------------
 // HELPERS
 // ----------------------------------------
@@ -741,6 +789,41 @@ function getSchemas() {
         },
       },
       required: ["article"],
+      additionalProperties: false,
+    },
+    comment: {
+      type: "object",
+      properties: {
+        comment: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+            },
+            body: { type: "string" },
+            author: {
+              type: "object",
+              properties: {
+                username: { type: "string" },
+                bio: { type: "string" },
+                image: { type: "string" },
+                following: { type: "boolean" },
+              },
+              required: ["username", "bio", "image", "following"],
+              additionalProperties: false,
+            },
+          },
+          required: ["id", "createdAt", "updatedAt", "body", "author"],
+          additionalProperties: false,
+        },
+      },
+      required: ["comment"],
       additionalProperties: false,
     },
   };
