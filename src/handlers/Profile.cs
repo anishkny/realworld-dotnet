@@ -14,25 +14,14 @@ public class ProfileHandlers
 
   public static IResult getProfile(HttpContext httpContext, string username)
   {
-    // Get the user from the database
-    var user = User.getByUsername(httpContext.RequestServices.GetService<Db>(), username);
+    var db = httpContext.RequestServices.GetService<Db>();
+    var user = User.getByUsername(db, username);
     if (user == null)
     {
       return Results.NotFound();
     }
-
-    // If the user is authenticated, check if they follow the profile
-    var isFollowing = false;
     var (currentUser, _) = Auth.getUserAndToken(httpContext);
-    if (currentUser != null)
-    {
-      isFollowing = Follow.isFollowing(
-        httpContext.RequestServices.GetService<Db>(),
-        currentUser.Id,
-        user.Id
-      );
-    }
-    return Results.Ok(new ProfileDTOEnvelope(user, isFollowing));
+    return Results.Ok(new ProfileDTOEnvelope(ProfileDTO.fromUserAsViewer(db!, user, currentUser!)));
   }
 
   public static IResult followUser(HttpContext httpContext, string username)
@@ -51,7 +40,7 @@ public class ProfileHandlers
     Follow.followUser(httpContext.RequestServices.GetService<Db>(), currentUser!, user);
 
     // Return the profile
-    return Results.Ok(new ProfileDTOEnvelope(user, true));
+    return Results.Ok(new ProfileDTOEnvelope(ProfileDTO.fromUser(user, true)));
   }
 
   public static IResult unfollowUser(HttpContext httpContext, string username)
@@ -70,6 +59,6 @@ public class ProfileHandlers
     Follow.unfollowUser(httpContext.RequestServices.GetService<Db>(), currentUser!, user);
 
     // Return the profile
-    return Results.Ok(new ProfileDTOEnvelope(user, false));
+    return Results.Ok(new ProfileDTOEnvelope(ProfileDTO.fromUser(user, false)));
   }
 }

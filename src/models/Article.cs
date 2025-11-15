@@ -108,11 +108,9 @@ public class ArticleDTOEnvelope
 
   public static ArticleDTOEnvelope fromArticle(Db db, Article article, User? viewer = null)
   {
-    bool isFollowing = false;
     bool isFavorited = false;
     if (viewer != null)
     {
-      isFollowing = Follow.isFollowing(db, viewer.Id, article.Author.Id);
       isFavorited = Favorite.isFavorited(db, viewer.Id, article.Id);
     }
     var favoritesCount = db.Favorites.Count(f => f.Article.Id == article.Id);
@@ -130,13 +128,7 @@ public class ArticleDTOEnvelope
         updatedAt = article.UpdatedAt.ToString("o"),
         favorited = isFavorited,
         favoritesCount = favoritesCount,
-        author = new ArticleAuthor
-        {
-          username = article.Author.Username,
-          bio = article.Author.Bio,
-          image = article.Author.Image,
-          following = isFollowing,
-        },
+        author = ProfileDTO.fromUserAsViewer(db, article.Author, viewer),
       },
     };
   }
@@ -153,13 +145,5 @@ public class ArticleDTO
   public string updatedAt { get; set; } = "";
   public bool favorited { get; set; } = false;
   public int favoritesCount { get; set; } = 0;
-  public ArticleAuthor author { get; set; } = null!;
-}
-
-public class ArticleAuthor
-{
-  public string username { get; set; } = "";
-  public string bio { get; set; } = "";
-  public string image { get; set; } = "";
-  public bool following { get; set; } = false;
+  public ProfileDTO author { get; set; } = null!;
 }
