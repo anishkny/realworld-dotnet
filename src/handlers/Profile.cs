@@ -12,9 +12,8 @@ public class ProfileHandlers
     app.MapDelete("/profiles/{username}/follow", unfollowUser);
   }
 
-  public static IResult getProfile(HttpContext httpContext, string username)
+  public static IResult getProfile(HttpContext httpContext, Db db, string username)
   {
-    var db = httpContext.RequestServices.GetService<Db>();
     var user = User.getByUsername(db, username);
     if (user == null)
     {
@@ -24,10 +23,10 @@ public class ProfileHandlers
     return Results.Ok(new ProfileDTOEnvelope(ProfileDTO.fromUserAsViewer(db!, user, currentUser!)));
   }
 
-  public static IResult followUser(HttpContext httpContext, string username)
+  public static IResult followUser(HttpContext httpContext, Db db, string username)
   {
     // Get the user from the database
-    var user = User.getByUsername(httpContext.RequestServices.GetService<Db>(), username);
+    var user = User.getByUsername(db, username);
     if (user == null)
     {
       return Results.NotFound();
@@ -37,16 +36,16 @@ public class ProfileHandlers
     var (currentUser, _) = Auth.getUserAndToken(httpContext);
 
     // Follow the user
-    Follow.followUser(httpContext.RequestServices.GetService<Db>(), currentUser!, user);
+    Follow.followUser(db, currentUser!, user);
 
     // Return the profile
     return Results.Ok(new ProfileDTOEnvelope(ProfileDTO.fromUser(user, true)));
   }
 
-  public static IResult unfollowUser(HttpContext httpContext, string username)
+  public static IResult unfollowUser(HttpContext httpContext, Db db, string username)
   {
     // Get the user from the database
-    var user = User.getByUsername(httpContext.RequestServices.GetService<Db>(), username);
+    var user = User.getByUsername(db, username);
     if (user == null)
     {
       return Results.NotFound();
@@ -56,7 +55,7 @@ public class ProfileHandlers
     var (currentUser, _) = Auth.getUserAndToken(httpContext);
 
     // Unfollow the user
-    Follow.unfollowUser(httpContext.RequestServices.GetService<Db>(), currentUser!, user);
+    Follow.unfollowUser(db, currentUser!, user);
 
     // Return the profile
     return Results.Ok(new ProfileDTOEnvelope(ProfileDTO.fromUser(user, false)));
