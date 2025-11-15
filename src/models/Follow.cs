@@ -59,7 +59,7 @@ public record ProfileDTO
     };
 
   // Create ProfileDTO from User and viewer to determine following status
-  public static ProfileDTO fromUser(Db db, User user, User? viewer)
+  public static ProfileDTO fromUserAsViewer(Db db, User user, User? viewer)
   {
     var isFollowing = false;
     if (viewer != null)

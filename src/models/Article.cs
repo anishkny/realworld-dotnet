@@ -128,7 +128,7 @@ public class ArticleDTOEnvelope
         updatedAt = article.UpdatedAt.ToString("o"),
         favorited = isFavorited,
         favoritesCount = favoritesCount,
-        author = ProfileDTO.fromUser(db, article.Author, viewer),
+        author = ProfileDTO.fromUserAsViewer(db, article.Author, viewer),
       },
     };
   }

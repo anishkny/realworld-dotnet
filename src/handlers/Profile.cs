@@ -21,7 +21,7 @@ public class ProfileHandlers
       return Results.NotFound();
     }
     var (currentUser, _) = Auth.getUserAndToken(httpContext);
-    return Results.Ok(new ProfileDTOEnvelope(ProfileDTO.fromUser(db!, user, currentUser!)));
+    return Results.Ok(new ProfileDTOEnvelope(ProfileDTO.fromUserAsViewer(db!, user, currentUser!)));
   }
 
   public static IResult followUser(HttpContext httpContext, string username)
