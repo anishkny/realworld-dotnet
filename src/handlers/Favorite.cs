@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 public class FavoriteHandlers
 {
   public static void MapMethods(IEndpointRouteBuilder app)
@@ -11,10 +9,10 @@ public class FavoriteHandlers
     app.MapDelete("/articles/{slug}/favorite", unfavoriteArticle);
   }
 
-  public static async Task<IResult> favoriteArticle(HttpContext httpContext, string slug)
+  public static async Task<IResult> favoriteArticle(HttpContext httpContext, Db db, string slug)
   {
     // Get the article from the database
-    var article = await Article.getBySlug(httpContext.RequestServices.GetService<Db>(), slug);
+    var article = await Article.getBySlug(db, slug);
     if (article == null)
     {
       return Results.NotFound();
@@ -24,22 +22,16 @@ public class FavoriteHandlers
     var (currentUser, _) = Auth.getUserAndToken(httpContext);
 
     // Favorite the article
-    Favorite.favoriteArticle(httpContext.RequestServices.GetService<Db>()!, currentUser!, article);
+    Favorite.favoriteArticle(db, currentUser!, article);
 
     // Return the article
-    return Results.Ok(
-      ArticleDTOEnvelope.fromArticle(
-        httpContext.RequestServices.GetService<Db>()!,
-        article,
-        currentUser!
-      )
-    );
+    return Results.Ok(ArticleDTOEnvelope.fromArticle(db, article, currentUser!));
   }
 
-  public static async Task<IResult> unfavoriteArticle(HttpContext httpContext, string slug)
+  public static async Task<IResult> unfavoriteArticle(HttpContext httpContext, Db db, string slug)
   {
     // Get the article from the database
-    var article = await Article.getBySlug(httpContext.RequestServices.GetService<Db>(), slug);
+    var article = await Article.getBySlug(db, slug);
     if (article == null)
     {
       return Results.NotFound();
@@ -49,19 +41,9 @@ public class FavoriteHandlers
     var (currentUser, _) = Auth.getUserAndToken(httpContext);
 
     // Unfavorite the article
-    Favorite.unfavoriteArticle(
-      httpContext.RequestServices.GetService<Db>()!,
-      currentUser!,
-      article
-    );
+    Favorite.unfavoriteArticle(db, currentUser!, article);
 
     // Return the article
-    return Results.Ok(
-      ArticleDTOEnvelope.fromArticle(
-        httpContext.RequestServices.GetService<Db>()!,
-        article,
-        currentUser!
-      )
-    );
+    return Results.Ok(ArticleDTOEnvelope.fromArticle(db, article, currentUser!));
   }
 }
