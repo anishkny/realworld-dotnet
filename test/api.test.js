@@ -615,6 +615,46 @@ describe("Favorites", () => {
   });
 });
 
+describe("Comments", () => {
+  it("Create comment", async () => {
+    // Create comment on celeb article
+    const commentBody = faker.lorem.sentences(2);
+    const res = await axios.post(
+      `/articles/${context.celebArticle.slug}/comments`,
+      { comment: { body: commentBody } },
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 200);
+    assert.ok(res.data.comment);
+    assert.equal(res.data.comment.body, commentBody);
+    context.comment = res.data.comment;
+  });
+
+  it("Create comment - Bad request", async () => {
+    const res = await axios.post(
+      `/articles/${context.celebArticle.slug}/comments`,
+      { xcomment: { body: "Invalid" } },
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 422);
+    assert.deepEqual(res.data, {
+      errors: [
+        "#/comment: PropertyRequired",
+        "#/xcomment: NoAdditionalPropertiesAllowed",
+      ],
+    });
+  });
+
+  it("Create comment - Unknown article", async () => {
+    const res = await axios.post(
+      `/articles/unknown-slug-${faker.string.uuid()}/comments`,
+      { comment: { body: "Test comment" } },
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 404);
+  });
+});
+
 // ----------------------------------------
 // HELPERS
 // ----------------------------------------

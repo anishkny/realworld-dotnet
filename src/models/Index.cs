@@ -6,6 +6,7 @@ public class Db(DbContextOptions<Db> options) : DbContext(options)
   public DbSet<Follow> Follows => Set<Follow>();
   public DbSet<Article> Articles => Set<Article>();
   public DbSet<Favorite> Favorites => Set<Favorite>();
+  public DbSet<Comment> Comments => Set<Comment>();
 
   // Set UpdatedAt before saving changes
   public override int SaveChanges()
