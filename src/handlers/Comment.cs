@@ -9,6 +9,9 @@ public class CommentHandlers
 
     // DELETE /articles/:slug/comments/:id - Delete a comment from an article
     app.MapDelete("/articles/{slug}/comments/{id:guid}", deleteComment);
+
+    // GET /articles/:slug/comments - Get comments for an article
+    app.MapGet("/articles/{slug}/comments", getCommentsForArticle);
   }
 
   public static async Task<IResult> addComment(HttpContext httpContext, Db db, string slug)
@@ -77,5 +80,30 @@ public class CommentHandlers
     await db.SaveChangesAsync();
 
     return Results.Ok();
+  }
+
+  public static async Task<IResult> getCommentsForArticle(
+    HttpContext httpContext,
+    Db db,
+    string slug
+  )
+  {
+    // Get the article from the database
+    var article = await Article.getBySlug(db, slug);
+    if (article == null)
+    {
+      return Results.NotFound();
+    }
+
+    // Get the current user
+    var (currentUser, _) = Auth.getUserAndToken(httpContext);
+
+    // Get the comments for the article including their authors
+    var comments = await db
+      .Comments.Include(c => c.Author)
+      .Where(c => c.Article.Id == article.Id)
+      .ToListAsync();
+
+    return Results.Ok(CommentsDTOEnvelope.fromComments(db, comments, currentUser!));
   }
 }

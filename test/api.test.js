@@ -705,6 +705,97 @@ describe("Comments", () => {
     );
     assert.equal(resCleanup.status, 200);
   });
+
+  it("Get comments", async () => {
+    // Create two comments
+    const commentBody1 = faker.lorem.sentences(2);
+    const res1 = await axios.post(
+      `/articles/${context.celebArticle.slug}/comments`,
+      { comment: { body: commentBody1 } },
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res1.status, 200);
+
+    const commentBody2 = faker.lorem.sentences(2);
+    const res2 = await axios.post(
+      `/articles/${context.celebArticle.slug}/comments`,
+      { comment: { body: commentBody2 } },
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res2.status, 200);
+
+    // Create comment by celeb user
+    const commentBody3 = faker.lorem.sentences(2);
+    const res3 = await axios.post(
+      `/articles/${context.celebArticle.slug}/comments`,
+      { comment: { body: commentBody3 } },
+      { headers: { Authorization: context.celebUser.token } }
+    );
+    assert.equal(res3.status, 200);
+
+    // Follow celeb user
+    const resFollow = await axios.post(
+      `/profiles/${context.celebUser.username}/follow`,
+      {},
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(resFollow.status, 200);
+
+    // Get comments for article
+    const resGet = await axios.get(
+      `/articles/${context.celebArticle.slug}/comments`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(resGet.status, 200);
+    assert.ok(Array.isArray(resGet.data.comments));
+    assert.ok(resGet.data.comments.find((c) => c.id === res1.data.comment.id));
+    assert.ok(resGet.data.comments.find((c) => c.id === res2.data.comment.id));
+    assert.ok(resGet.data.comments.find((c) => c.id === res3.data.comment.id));
+
+    // Verify following status
+    assert.ok(
+      resGet.data.comments.find((c) => c.id === res3.data.comment.id).author
+        .following
+    );
+
+    // Get comments as unauthenticated user
+    const resGetUnauth = await axios.get(
+      `/articles/${context.celebArticle.slug}/comments`
+    );
+    assert.equal(resGetUnauth.status, 200);
+    assert.ok(Array.isArray(resGetUnauth.data.comments));
+    for (const comment of resGetUnauth.data.comments) {
+      assert.equal(comment.author.following, false);
+    }
+
+    // Clean up
+    for (const comment of resGet.data.comments) {
+      const token =
+        comment.author.username === context.user.username
+          ? context.user.token
+          : context.celebUser.token;
+      const resDel = await axios.delete(
+        `/articles/${context.celebArticle.slug}/comments/${comment.id}`,
+        { headers: { Authorization: token } }
+      );
+      assert.equal(resDel.status, 200);
+    }
+
+    // Unfollow celeb user
+    const resUnfollow = await axios.delete(
+      `/profiles/${context.celebUser.username}/follow`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(resUnfollow.status, 200);
+  });
+
+  it("Get comments - Unknown article", async () => {
+    const res = await axios.get(
+      `/articles/unknown-slug-${faker.string.uuid()}/comments`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 404);
+  });
 });
 
 // ----------------------------------------
