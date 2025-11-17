@@ -49,3 +49,18 @@ public class CommentDTO
       author = ProfileDTO.fromUserAsViewer(db, comment.Author, viewer),
     };
 }
+
+public class CommentsDTOEnvelope
+{
+  public List<CommentDTO> comments { get; set; } = [];
+
+  public CommentsDTOEnvelope(List<CommentDTO> comments) => this.comments = comments;
+
+  public static CommentsDTOEnvelope fromComments(Db db, List<Comment> comments, User viewer)
+  {
+    var commentDTOs = comments
+      .Select(comment => CommentDTO.fromComment(db, comment, viewer))
+      .ToList();
+    return new CommentsDTOEnvelope(commentDTOs);
+  }
+}
