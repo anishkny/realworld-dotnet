@@ -74,4 +74,39 @@ public record ProfileDTO
       following = isFollowing,
     };
   }
+
+  // Create dictionary of ProfileDTOs from list of Users and viewer
+  public static Dictionary<Guid, ProfileDTO> fromUsersAsViewer(
+    Db db,
+    List<User> users,
+    User? viewer
+  )
+  {
+    var profiles = new Dictionary<Guid, ProfileDTO>();
+    var userIds = users.Select(u => u.Id).Distinct().ToList();
+
+    HashSet<Guid> followingIds = [];
+    if (viewer != null)
+    {
+      followingIds =
+      [
+        .. db
+          .Follows.Where(f => f.Follower.Id == viewer.Id && userIds.Contains(f.Followed.Id))
+          .Select(f => f.Followed.Id),
+      ];
+    }
+
+    foreach (var user in users)
+    {
+      profiles[user.Id] = new ProfileDTO
+      {
+        username = user.Username,
+        bio = user.Bio ?? "",
+        image = user.Image ?? "",
+        following = followingIds.Contains(user.Id),
+      };
+    }
+
+    return profiles;
+  }
 }

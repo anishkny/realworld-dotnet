@@ -58,9 +58,22 @@ public class CommentsDTOEnvelope
 
   public static CommentsDTOEnvelope fromComments(Db db, List<Comment> comments, User viewer)
   {
+    // Get authors' profiles
+    List<User> authors = [.. comments.Select(c => c.Author)];
+    var profiles = ProfileDTO.fromUsersAsViewer(db, authors, viewer);
+
+    // Create CommentDTOs
     var commentDTOs = comments
-      .Select(comment => CommentDTO.fromComment(db, comment, viewer))
+      .Select(c => new CommentDTO
+      {
+        id = c.Id,
+        body = c.Body,
+        createdAt = c.CreatedAt,
+        updatedAt = c.UpdatedAt,
+        author = profiles[c.Author.Id],
+      })
       .ToList();
+
     return new CommentsDTOEnvelope(commentDTOs);
   }
 }

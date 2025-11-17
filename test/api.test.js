@@ -758,6 +758,16 @@ describe("Comments", () => {
         .following
     );
 
+    // Get comments as unauthenticated user
+    const resGetUnauth = await axios.get(
+      `/articles/${context.celebArticle.slug}/comments`
+    );
+    assert.equal(resGetUnauth.status, 200);
+    assert.ok(Array.isArray(resGetUnauth.data.comments));
+    for (const comment of resGetUnauth.data.comments) {
+      assert.equal(comment.author.following, false);
+    }
+
     // Clean up
     for (const comment of resGet.data.comments) {
       const token =
