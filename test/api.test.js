@@ -653,6 +653,58 @@ describe("Comments", () => {
     );
     assert.equal(res.status, 404);
   });
+
+  it("Delete comment", async () => {
+    const res = await axios.delete(
+      `/articles/${context.celebArticle.slug}/comments/${context.comment.id}`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 200);
+  });
+
+  it("Delete comment - Unknown article", async () => {
+    const res = await axios.delete(
+      `/articles/unknown-slug-${faker.string.uuid()}/comments/${
+        context.comment.id
+      }`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 404);
+  });
+
+  it("Delete comment - Unknown comment", async () => {
+    const res = await axios.delete(
+      `/articles/${context.celebArticle.slug}/comments/${faker.string.uuid()}`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(res.status, 404);
+  });
+
+  it("Delete comment - Unauthorized", async () => {
+    // Create comment to delete
+    const commentBody = faker.lorem.sentences(2);
+    const resCreate = await axios.post(
+      `/articles/${context.celebArticle.slug}/comments`,
+      { comment: { body: commentBody } },
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(resCreate.status, 200);
+    const commentToDelete = resCreate.data.comment;
+
+    // Attempt to delete comment as celeb user
+    const resDelete = await axios.delete(
+      `/articles/${context.celebArticle.slug}/comments/${commentToDelete.id}`,
+      { headers: { Authorization: context.celebUser.token } }
+    );
+    assert.equal(resDelete.status, 403);
+
+    // Clean up by deleting comment as original user
+    const resCleanup = await axios.delete(
+      `/articles/${context.celebArticle.slug}/comments/${commentToDelete.id}`,
+      { headers: { Authorization: context.user.token } }
+    );
+    assert.equal(resCleanup.status, 200);
+  });
 });
 
 // ----------------------------------------
