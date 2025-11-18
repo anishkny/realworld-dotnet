@@ -155,13 +155,49 @@ public class ArticlesDTOEnvelope
 
   public static ArticlesDTOEnvelope fromArticles(Db db, List<Article> articles, User? viewer = null)
   {
-    return new ArticlesDTOEnvelope
+    // Get authors' profiles
+    List<User> authors = [.. articles.Select(a => a.Author)];
+    var profiles = ProfileDTO.fromUsersAsViewer(db, authors, viewer);
+
+    // Get article IDs
+    var articleIds = articles.Select(a => a.Id).ToList();
+
+    // Get favorites for viewer
+    HashSet<Guid> favoritedArticleIds = [];
+    if (viewer != null)
     {
-      articles =
+      favoritedArticleIds =
       [
-        .. articles.Select(article => ArticleDTOEnvelope.fromArticle(db, article, viewer).article),
-      ],
-      articlesCount = articles.Count,
-    };
+        .. db
+          .Favorites.Where(f => f.User.Id == viewer.Id && articleIds.Contains(f.Article.Id))
+          .Select(f => f.Article.Id),
+      ];
+    }
+
+    // Get article favorite counts
+    Dictionary<Guid, int> favoriteCounts = db
+      .Favorites.Where(f => articleIds.Contains(f.Article.Id))
+      .GroupBy(f => f.Article.Id)
+      .Select(g => new { ArticleId = g.Key, Count = g.Count() })
+      .ToDictionary(x => x.ArticleId, x => x.Count);
+
+    // Construct ArticleDTOs
+    var articleDTOs = articles
+      .Select(article => new ArticleDTO
+      {
+        slug = article.Slug,
+        title = article.Title,
+        description = article.Description,
+        body = article.Body,
+        tagList = article.Tags.Select(t => t.Name).ToList(),
+        createdAt = article.CreatedAt.ToString("o"),
+        updatedAt = article.UpdatedAt.ToString("o"),
+        favorited = favoritedArticleIds.Contains(article.Id),
+        favoritesCount = favoriteCounts.TryGetValue(article.Id, out int value) ? value : 0,
+        author = profiles[article.Author.Id],
+      })
+      .ToList();
+
+    return new ArticlesDTOEnvelope { articles = articleDTOs, articlesCount = articleDTOs.Count };
   }
 }
