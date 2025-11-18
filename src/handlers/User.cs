@@ -5,16 +5,16 @@ public class UserHandlers
   public static void MapMethods(IEndpointRouteBuilder app)
   {
     // POST /users - Register a new user
-    app.MapPost("/users", UserHandlers.registerUser);
+    app.MapPost("/users", registerUser);
 
     // POST /users/login - Login
-    app.MapPost("/users/login", UserHandlers.loginUser);
+    app.MapPost("/users/login", loginUser);
 
     // GET /user - Get current user
-    app.MapGet("/user", UserHandlers.getCurrentUser);
+    app.MapGet("/user", getCurrentUser);
 
     // PUT /user - Update current user
-    app.MapPut("/user", UserHandlers.updateCurrentUser);
+    app.MapPut("/user", updateCurrentUser);
   }
 
   public static async Task<IResult> registerUser(HttpContext httpContext, Db db)

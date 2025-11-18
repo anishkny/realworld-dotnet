@@ -147,3 +147,21 @@ public class ArticleDTO
   public int favoritesCount { get; set; } = 0;
   public ProfileDTO author { get; set; } = null!;
 }
+
+public class ArticlesDTOEnvelope
+{
+  public List<ArticleDTO> articles { get; set; } = [];
+  public int articlesCount { get; set; } = 0;
+
+  public static ArticlesDTOEnvelope fromArticles(Db db, List<Article> articles, User? viewer = null)
+  {
+    return new ArticlesDTOEnvelope
+    {
+      articles =
+      [
+        .. articles.Select(article => ArticleDTOEnvelope.fromArticle(db, article, viewer).article),
+      ],
+      articlesCount = articles.Count,
+    };
+  }
+}

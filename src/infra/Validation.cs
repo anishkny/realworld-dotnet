@@ -1,23 +1,22 @@
+using System.Collections.Concurrent;
 using NJsonSchema;
 
 public class Validation
 {
-  public static Dictionary<Type, JsonSchema> _cache = [];
+  public static ConcurrentDictionary<Type, JsonSchema> _cache =
+    new ConcurrentDictionary<Type, JsonSchema>();
 
   public static (T @object, IList<string> errors) Parse<T>(string json)
   {
-    JsonSchema schema;
-    if (_cache.ContainsKey(typeof(T)))
-    {
-      schema = _cache[typeof(T)];
-    }
-    else
-    {
-      schema = JsonSchema.FromType<T>();
-      schema.AllowAdditionalProperties = false;
-      _cache[typeof(T)] = schema;
-    }
-
+    var schema = _cache.GetOrAdd(
+      typeof(T),
+      t =>
+      {
+        var s = JsonSchema.FromType<T>();
+        s.AllowAdditionalProperties = false;
+        return s;
+      }
+    );
     ICollection<NJsonSchema.Validation.ValidationError> errors;
     IList<string> errorMessages;
     T? obj;
