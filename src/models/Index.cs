@@ -5,6 +5,7 @@ public class Db(DbContextOptions<Db> options) : DbContext(options)
   public DbSet<User> Users => Set<User>();
   public DbSet<Follow> Follows => Set<Follow>();
   public DbSet<Article> Articles => Set<Article>();
+  public DbSet<ArticleTag> ArticleTags => Set<ArticleTag>();
   public DbSet<Favorite> Favorites => Set<Favorite>();
   public DbSet<Comment> Comments => Set<Comment>();
 
