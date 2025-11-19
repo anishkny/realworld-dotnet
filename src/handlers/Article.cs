@@ -5,16 +5,19 @@ public class ArticleHandlers
   public static void MapMethods(IEndpointRouteBuilder app)
   {
     // POST /articles - Create a new article
-    app.MapPost("/articles", ArticleHandlers.createArticle);
+    app.MapPost("/articles", createArticle);
 
     // PUT /articles/{slug} - Update an article
-    app.MapPut("/articles/{slug}", ArticleHandlers.updateArticle);
+    app.MapPut("/articles/{slug}", updateArticle);
 
     // DELETE /articles/{slug} - Delete an article
-    app.MapDelete("/articles/{slug}", ArticleHandlers.deleteArticle);
+    app.MapDelete("/articles/{slug}", deleteArticle);
 
     // GET /articles/{slug} - Get an article
-    app.MapGet("/articles/{slug}", ArticleHandlers.getArticle);
+    app.MapGet("/articles/{slug}", getArticle);
+
+    // List articles
+    app.MapGet("/articles", listArticles);
   }
 
   public static async Task<IResult> createArticle(HttpContext httpContext, Db db)
@@ -89,5 +92,49 @@ public class ArticleHandlers
     }
     var (user, _) = Auth.getUserAndToken(httpContext);
     return Results.Ok(ArticleDTOEnvelope.fromArticle(db, article, user));
+  }
+
+  // Return most recent articles, optionally filtered by tag, author, or favorited by a user
+  // Supports pagination via limit (default 20) and offset (default 0) query parameters
+  public static IResult listArticles(HttpContext httpContext, Db db)
+  {
+    var (user, _) = Auth.getUserAndToken(httpContext);
+
+    // Parse query parameters
+    var query = httpContext.Request.Query;
+    string? tag = query.ContainsKey("tag") ? query["tag"].ToString() : null;
+    string? authorUsername = query.ContainsKey("author") ? query["author"].ToString() : null;
+    string? favoritedByUsername = query.ContainsKey("favorited")
+      ? query["favorited"].ToString()
+      : null;
+    int limit = (query.ContainsKey("limit") && int.TryParse(query["limit"], out var l)) ? l : 20;
+    int offset = (query.ContainsKey("offset") && int.TryParse(query["offset"], out var o)) ? o : 0;
+
+    // Construct the base query
+    var articlesQuery = db.Articles.Include(a => a.Author).Include(a => a.Tags).AsQueryable();
+
+    // Apply filters if present
+    if (tag != null)
+    {
+      articlesQuery = articlesQuery.Where(a => a.Tags.Any(t => t.Name == tag));
+    }
+    else if (authorUsername != null)
+    {
+      articlesQuery = articlesQuery.Where(a => a.Author.Username == authorUsername);
+    }
+    else if (favoritedByUsername != null)
+    {
+      articlesQuery = articlesQuery.Where(a =>
+        db.Favorites.Any(f => f.User.Username == favoritedByUsername && f.Article.Id == a.Id)
+      );
+    }
+
+    // Apply sorting, pagination
+    articlesQuery = articlesQuery.OrderByDescending(a => a.UpdatedAt).Skip(offset).Take(limit);
+
+    // Execute the query
+    var articles = articlesQuery.ToList();
+
+    return Results.Ok(ArticlesDTOEnvelope.fromArticles(db, articles, user));
   }
 }
