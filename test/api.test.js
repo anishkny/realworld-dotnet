@@ -798,7 +798,7 @@ describe("Comments", () => {
   });
 });
 
-describe("List Articles", () => {
+describe("Articles - List/Feed", () => {
   // Create multiple articles and authors for testing
   before(async () => {
     const promises = [];
@@ -874,81 +874,138 @@ describe("List Articles", () => {
     assert.equal(resFollow4.status, 200);
   });
 
-  it("List articles - Default", async () => {
-    const res = await axios.get("/articles");
-    assert.equal(res.status, 200);
-    assert.ok(Array.isArray(res.data.articles));
-    assert.equal(res.data.articles.length, 20);
-    assert.equal(res.data.articlesCount, 20);
-    assertArticlesInDescendingOrder(res.data.articles);
-  });
+  describe("List Articles", () => {
+    it("List articles", async () => {
+      const res = await axios.get("/articles");
+      assert.equal(res.status, 200);
+      assert.ok(Array.isArray(res.data.articles));
+      assert.equal(res.data.articles.length, 20);
+      assert.equal(res.data.articlesCount, 20);
+      assertArticlesInDescendingOrder(res.data.articles);
+    });
 
-  it("List articles - Limit and Offset", async () => {
-    const res = await axios.get("/articles?limit=10&offset=5");
-    assert.equal(res.status, 200);
-    assert.ok(Array.isArray(res.data.articles));
-    assert.equal(res.data.articles.length, 10);
-    assert.equal(res.data.articlesCount, 10);
-    assertArticlesInDescendingOrder(res.data.articles);
-  });
+    it("List articles - Limit and Offset", async () => {
+      const res = await axios.get("/articles?limit=10&offset=5");
+      assert.equal(res.status, 200);
+      assert.ok(Array.isArray(res.data.articles));
+      assert.equal(res.data.articles.length, 10);
+      assert.equal(res.data.articlesCount, 10);
+      assertArticlesInDescendingOrder(res.data.articles);
+    });
 
-  it("List articles - Tag", async () => {
-    const res = await axios.get("/articles?tag=even");
-    assert.equal(res.status, 200);
-    assert.ok(Array.isArray(res.data.articles));
-    for (const article of res.data.articles) {
-      assert.ok(article.tagList.includes("even"));
-    }
-    assertArticlesInDescendingOrder(res.data.articles);
-  });
+    it("List articles - Tag", async () => {
+      const res = await axios.get("/articles?tag=even");
+      assert.equal(res.status, 200);
+      assert.ok(Array.isArray(res.data.articles));
+      for (const article of res.data.articles) {
+        assert.ok(article.tagList.includes("even"));
+      }
+      assertArticlesInDescendingOrder(res.data.articles);
+    });
 
-  it("List articles - Author", async () => {
-    const author = context.authors[0];
-    const res = await axios.get(`/articles?author=${author.username}`);
-    assert.equal(res.status, 200);
-    assert.ok(Array.isArray(res.data.articles));
-    for (const article of res.data.articles) {
-      assert.equal(article.author.username, author.username);
-    }
-    assertArticlesInDescendingOrder(res.data.articles);
-  });
+    it("List articles - Author", async () => {
+      const author = context.authors[0];
+      const res = await axios.get(`/articles?author=${author.username}`);
+      assert.equal(res.status, 200);
+      assert.ok(Array.isArray(res.data.articles));
+      for (const article of res.data.articles) {
+        assert.equal(article.author.username, author.username);
+      }
+      assertArticlesInDescendingOrder(res.data.articles);
+    });
 
-  it("List articles - Favorited", async () => {
-    const user = context.authors[0];
-    const res = await axios.get(`/articles?favorited=${user.username}`);
-    assert.equal(res.status, 200);
-    assert.ok(Array.isArray(res.data.articles));
-    for (const article of res.data.articles) {
-      // Article should be favorited by the user
-      const resArticle = await axios.get(`/articles/${article.slug}`, {
+    it("List articles - Favorited", async () => {
+      const user = context.authors[0];
+      const res = await axios.get(`/articles?favorited=${user.username}`);
+      assert.equal(res.status, 200);
+      assert.ok(Array.isArray(res.data.articles));
+      for (const article of res.data.articles) {
+        // Article should be favorited by the user
+        const resArticle = await axios.get(`/articles/${article.slug}`, {
+          headers: { Authorization: user.token },
+        });
+        assert.equal(resArticle.status, 200);
+        assert.equal(resArticle.data.article.favorited, true);
+      }
+      assertArticlesInDescendingOrder(res.data.articles);
+    });
+
+    it("List articles - Authenticated", async () => {
+      const user = context.authors[0];
+      const res = await axios.get("/articles", {
         headers: { Authorization: user.token },
       });
-      assert.equal(resArticle.status, 200);
-      assert.equal(resArticle.data.article.favorited, true);
-    }
-    assertArticlesInDescendingOrder(res.data.articles);
+      assert.equal(res.status, 200);
+      assert.ok(Array.isArray(res.data.articles));
+      assertArticlesInDescendingOrder(res.data.articles);
+
+      // Verify that following is true for authors 2 and 4, false for others
+      for (const article of res.data.articles) {
+        if (
+          article.author.username === context.authors[2].username ||
+          article.author.username === context.authors[4].username
+        ) {
+          assert.equal(article.author.following, true);
+        } else {
+          assert.equal(article.author.following, false);
+        }
+      }
+    });
   });
 
-  it("List articles - Authenticated", async () => {
-    const user = context.authors[0];
-    const res = await axios.get("/articles", {
-      headers: { Authorization: user.token },
-    });
-    assert.equal(res.status, 200);
-    assert.ok(Array.isArray(res.data.articles));
-    assertArticlesInDescendingOrder(res.data.articles);
+  describe("Feed Articles", () => {
+    it("Feed articles", async () => {
+      const user = context.authors[0];
+      const res = await axios.get("/articles/feed", {
+        headers: { Authorization: user.token },
+      });
+      assert.equal(res.status, 200);
+      assert.ok(Array.isArray(res.data.articles));
+      assertArticlesInDescendingOrder(res.data.articles);
 
-    // Verify that following is true for authors 2 and 4, false for others
-    for (const article of res.data.articles) {
-      if (
-        article.author.username === context.authors[2].username ||
-        article.author.username === context.authors[4].username
-      ) {
-        assert.equal(article.author.following, true);
-      } else {
-        assert.equal(article.author.following, false);
+      // All articles should be from followed users (authors 2 and 4)
+      for (const article of res.data.articles) {
+        assert.ok(
+          article.author.username === context.authors[2].username ||
+            article.author.username === context.authors[4].username
+        );
       }
-    }
+    });
+
+    it("Feed articles - Limit and Offset", async () => {
+      const user = context.authors[0];
+      const res = await axios.get("/articles/feed?limit=5&offset=2", {
+        headers: { Authorization: user.token },
+      });
+      assert.equal(res.status, 200);
+      assert.ok(Array.isArray(res.data.articles));
+      assert.equal(res.data.articles.length, 5);
+      assertArticlesInDescendingOrder(res.data.articles);
+
+      // All articles should be from followed users (authors 2 and 4)
+      for (const article of res.data.articles) {
+        assert.ok(
+          article.author.username === context.authors[2].username ||
+            article.author.username === context.authors[4].username
+        );
+      }
+    });
+
+    it("Feed articles - No followed users", async () => {
+      const user = context.authors[1]; // This user follows no one
+      const res = await axios.get("/articles/feed", {
+        headers: { Authorization: user.token },
+      });
+      assert.equal(res.status, 200);
+      assert.ok(Array.isArray(res.data.articles));
+      assert.equal(res.data.articles.length, 0);
+      assert.equal(res.data.articlesCount, 0);
+    });
+
+    it("Feed articles - Unauthenticated", async () => {
+      const res = await axios.get("/articles/feed");
+      assert.equal(res.status, 401);
+    });
   });
 });
 

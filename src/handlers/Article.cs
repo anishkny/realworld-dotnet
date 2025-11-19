@@ -4,6 +4,9 @@ public class ArticleHandlers
 {
   public static void MapMethods(IEndpointRouteBuilder app)
   {
+    // GET /articles/feed - Get articles from followed users
+    app.MapGet("/articles/feed", getFeed);
+
     // POST /articles - Create a new article
     app.MapPost("/articles", createArticle);
 
@@ -16,7 +19,7 @@ public class ArticleHandlers
     // GET /articles/{slug} - Get an article
     app.MapGet("/articles/{slug}", getArticle);
 
-    // List articles
+    // GET /articles - List articles
     app.MapGet("/articles", listArticles);
   }
 
@@ -107,8 +110,8 @@ public class ArticleHandlers
     string? favoritedByUsername = query.ContainsKey("favorited")
       ? query["favorited"].ToString()
       : null;
-    int limit = (query.ContainsKey("limit") && int.TryParse(query["limit"], out var l)) ? l : 20;
-    int offset = (query.ContainsKey("offset") && int.TryParse(query["offset"], out var o)) ? o : 0;
+    int limit = int.TryParse(query["limit"], out var l) ? l : 20;
+    int offset = int.TryParse(query["offset"], out var o) ? o : 0;
 
     // Construct the base query
     var articlesQuery = db.Articles.Include(a => a.Author).Include(a => a.Tags).AsQueryable();
@@ -134,6 +137,46 @@ public class ArticleHandlers
 
     // Execute the query
     var articles = articlesQuery.ToList();
+
+    return Results.Ok(ArticlesDTOEnvelope.fromArticles(db, articles, user));
+  }
+
+  // Return most recent articles from users followed by the current user
+  // Supports pagination via limit (default 20) and offset (default 0) query parameters
+  public static IResult getFeed(HttpContext httpContext, Db db)
+  {
+    var (user, _) = Auth.getUserAndToken(httpContext);
+    if (user == null)
+    {
+      return Results.StatusCode(StatusCodes.Status401Unauthorized);
+    }
+
+    // Parse query parameters
+    var query = httpContext.Request.Query;
+    int limit = int.TryParse(query["limit"], out var l) ? l : 20;
+    int offset = int.TryParse(query["offset"], out var o) ? o : 0;
+
+    // Get IDs of users followed by the current user
+    var followedUserIds = db
+      .Follows.Where(f => f.Follower.Id == user!.Id)
+      .Select(f => f.Followed.Id)
+      .ToList();
+
+    // If no followed users, return empty list
+    if (followedUserIds.Count == 0)
+    {
+      return Results.Ok(new ArticlesDTOEnvelope { articles = [], articlesCount = 0 });
+    }
+
+    // Get articles authored by followed users
+    var articles = db
+      .Articles.Include(a => a.Author)
+      .Include(a => a.Tags)
+      .Where(a => followedUserIds.Contains(a.Author.Id))
+      .OrderByDescending(a => a.UpdatedAt)
+      .Skip(offset)
+      .Take(limit)
+      .ToList();
 
     return Results.Ok(ArticlesDTOEnvelope.fromArticles(db, articles, user));
   }
