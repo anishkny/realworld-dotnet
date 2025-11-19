@@ -798,13 +798,12 @@ describe("Comments", () => {
   });
 });
 
-describe("Articles - List/Feed", () => {
+describe("Multiple Articles", () => {
   // Create multiple articles and authors for testing
   before(async () => {
-    const promises = [];
-
     // Create few authors
     context.authors = [];
+    let promises = [];
     for (let i = 0; i < 5; i++) {
       const authorData = generateTestUserData(`author${i}_`);
       const p = axios.post("/users", { user: authorData }).then((res) => {
@@ -817,6 +816,7 @@ describe("Articles - List/Feed", () => {
 
     // Create few articles
     context.articles = [];
+    promises = [];
     for (let i = 0; i < 25; i++) {
       const articleData = {
         title: `Article ${i} ` + faker.lorem.sentence(),
@@ -843,6 +843,7 @@ describe("Articles - List/Feed", () => {
     await Promise.all(promises);
 
     // Favorite some articles by first user
+    promises = [];
     for (let i = 0; i < context.articles.length; i += 3) {
       const article = context.articles[i];
       const p = axios
@@ -859,19 +860,37 @@ describe("Articles - List/Feed", () => {
     await Promise.all(promises);
 
     // Get user0 to follow user2 and user4
-    const resFollow2 = await axios.post(
-      `/profiles/${context.authors[2].username}/follow`,
-      {},
-      { headers: { Authorization: context.authors[0].token } }
-    );
-    assert.equal(resFollow2.status, 200);
+    promises = [];
+    for (const userIndex of [2, 4]) {
+      const p = axios
+        .post(
+          `/profiles/${context.authors[userIndex].username}/follow`,
+          {},
+          { headers: { Authorization: context.authors[0].token } }
+        )
+        .then((res) => {
+          assert.equal(res.status, 200);
+        });
+      promises.push(p);
+    }
+    await Promise.all(promises);
 
-    const resFollow4 = await axios.post(
-      `/profiles/${context.authors[4].username}/follow`,
-      {},
-      { headers: { Authorization: context.authors[0].token } }
-    );
-    assert.equal(resFollow4.status, 200);
+    // Favorite last article by all authors
+    const lastArticle = context.articles[context.articles.length - 1];
+    promises = [];
+    for (const author of context.authors) {
+      const p = axios
+        .post(
+          `/articles/${lastArticle.slug}/favorite`,
+          {},
+          { headers: { Authorization: author.token } }
+        )
+        .then((res) => {
+          assert.equal(res.status, 200);
+        });
+      promises.push(p);
+    }
+    await Promise.all(promises);
   });
 
   describe("List Articles", () => {
@@ -928,6 +947,15 @@ describe("Articles - List/Feed", () => {
         assert.equal(resArticle.data.article.favorited, true);
       }
       assertArticlesInDescendingOrder(res.data.articles);
+
+      // Verify favoritesCount of last article
+      const lastArticle = context.articles[context.articles.length - 1];
+      const resLastArticle = await axios.get(`/articles/${lastArticle.slug}`);
+      assert.equal(resLastArticle.status, 200);
+      assert.equal(
+        resLastArticle.data.article.favoritesCount,
+        context.authors.length
+      );
     });
 
     it("List articles - Authenticated", async () => {
