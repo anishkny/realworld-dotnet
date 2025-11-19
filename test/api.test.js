@@ -822,7 +822,13 @@ describe("Multiple Articles", () => {
         title: `Article ${i} ` + faker.lorem.sentence(),
         description: faker.lorem.sentences(2),
         body: faker.lorem.paragraphs(3),
-        tagList: [i % 2 === 0 ? "even" : "odd", "test"],
+        tagList: [
+          i % 2 === 0 ? "even" : "odd",
+          "test",
+          faker.lorem.word(),
+          faker.lorem.word(),
+          faker.lorem.word(),
+        ],
       };
       const p = axios
         .post(
@@ -1033,6 +1039,28 @@ describe("Multiple Articles", () => {
     it("Feed articles - Unauthenticated", async () => {
       const res = await axios.get("/articles/feed");
       assert.equal(res.status, 401);
+    });
+  });
+
+  describe("Tags", () => {
+    it("Get tags", async () => {
+      const res = await axios.get("/tags");
+      assert.equal(res.status, 200);
+      assert.ok(Array.isArray(res.data.tags));
+
+      // Get all unique tags from created articles
+      const expectedTags = new Set();
+      for (const article of context.articles) {
+        for (const tag of article.tagList) {
+          expectedTags.add(tag);
+        }
+      }
+
+      // Verify that all unique tags are present in the response
+      const actualTags = new Set(res.data.tags);
+      for (const tag of expectedTags) {
+        assert.ok(actualTags.has(tag));
+      }
     });
   });
 });

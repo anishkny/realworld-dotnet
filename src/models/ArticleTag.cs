@@ -11,3 +11,8 @@ public class ArticleTag : BaseEntity
   public Article Article { get; set; } = null!;
   public string Name { get; set; } = "";
 }
+
+public class TagsDTOEnvelope
+{
+  public List<string> tags { get; set; } = [];
+}

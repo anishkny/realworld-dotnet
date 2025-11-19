@@ -9,5 +9,6 @@ public class RouteMapper
     ArticleHandlers.MapMethods(apiGroup);
     FavoriteHandlers.MapMethods(apiGroup);
     CommentHandlers.MapMethods(apiGroup);
+    TagHandlers.MapMethods(apiGroup);
   }
 }
