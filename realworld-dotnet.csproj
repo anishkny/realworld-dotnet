@@ -16,7 +16,7 @@
     </PackageReference>
     <PackageReference Include="NJsonSchema" Version="11.5.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="Slugify.Core" Version="5.1.1" />
   </ItemGroup>
 </Project>
