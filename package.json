@@ -17,7 +17,7 @@
     "@xmldom/xmldom": "^0.8.11",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
-    "axios": "^1.13.5",
+    "axios": "^1.13.6",
     "kill-port-process": "^4.0.2",
     "mocha": "^11.7.5",
     "wait-port": "^1.1.0",
